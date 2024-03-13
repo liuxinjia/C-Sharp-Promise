@@ -238,8 +238,8 @@ namespace RSG.Tests
         public void chain_multiple_promises_using_all_that_are_resolved_out_of_order()
         {
             var promise = Promise.Create();
-            var chainedPromise1 = new Promise<int>();
-            var chainedPromise2 = new Promise<int>();
+            var chainedPromise1 = Promise<int>.Create();
+            var chainedPromise2 = Promise<int>.Create();
             const int chainedResult1 = 10;
             const int chainedResult2 = 15;
 
@@ -280,8 +280,8 @@ namespace RSG.Tests
         public void chain_multiple_value_promises_using_all_resolved_out_of_order()
         {
             var promise = Promise.Create();
-            var chainedPromise1 = new Promise<int>();
-            var chainedPromise2 = new Promise<int>();
+            var chainedPromise1 = Promise<int>.Create();
+            var chainedPromise2 = Promise<int>.Create();
             const int chainedResult1 = 10;
             const int chainedResult2 = 15;
 
@@ -501,7 +501,7 @@ namespace RSG.Tests
         public void can_chain_promise_and_convert_to_promise_that_yields_a_value()
         {
             var promise = Promise.Create();
-            var chainedPromise = new Promise<string>();
+            var chainedPromise = Promise<string>.Create();
             const string chainedPromiseValue = "some-value";
 
             var completed = 0;
@@ -1066,7 +1066,7 @@ namespace RSG.Tests
         [Fact]
         public void inner_exception_handled_by_outer_promise_with_results()
         {
-            var promise = new Promise<int>();
+            var promise = Promise<int>.Create();
             var errorCallback = 0;
             var expectedException = new Exception();
 

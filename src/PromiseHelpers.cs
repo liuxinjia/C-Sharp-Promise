@@ -12,7 +12,7 @@ namespace RSG
             var val2 = default(T2);
             var numUnresolved = 2;
             var alreadyRejected = false;
-            var promise = new Promise<Tuple<T1, T2>>();
+            var promise = Promise<Tuple<T1, T2>>.Create();
 
             p1
                 .Then(val => 

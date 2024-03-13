@@ -1,4 +1,4 @@
-﻿using RSG;
+using RSG;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -67,7 +67,7 @@ namespace Example4
         {
             Console.WriteLine("Downloading " + url + " ...");
 
-            var promise = new Promise<string>();
+            var promise = Promise<string>.Create();
             using (var client = new WebClient())
             {
                 client.DownloadStringCompleted +=

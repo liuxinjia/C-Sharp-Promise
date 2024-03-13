@@ -17,12 +17,10 @@ namespace RSG
         /// </summary>
         int Id { get; }
 
-#if !DEBUG
         /// <summary>
         /// Set the name of the promise, useful for debugging.
         /// </summary>
         IPromise WithName(string name);
-#endif
 
         /// <summary>
         /// Completes the promise. 
@@ -348,7 +346,7 @@ namespace RSG
         {
             get
             {
-                PromiseValueContainers.TryGetEx(id, out var e);
+                PromiseContainers.TryGetEx(id, out var e);
                 return e;
             }
         }
@@ -360,12 +358,12 @@ namespace RSG
         {
             get
             {
-                PromiseValueContainers.TryGetState(id, out var state);
+                PromiseContainers.TryGetState(id, out var state);
                 return state;
             }
-            set
+            private set
             {
-                PromiseValueContainers.ChangeState(id, value);
+                PromiseContainers.ChangeState(id, value);
             }
         }
 
@@ -583,7 +581,7 @@ namespace RSG
                 );
             }
 
-            PromiseValueContainers.CreateEx(id, ex);
+            PromiseContainers.ChagneEx(id, ex);
             CurState = PromiseState.Rejected;
 
             if (EnablePromiseTracking)
@@ -688,21 +686,21 @@ namespace RSG
 #endif
         }
 
-#if !DEBUG
         /// <summary>
         /// Set the name of the promise, useful for debugging.
         /// </summary>
         public IPromise WithName(string name)
         {
+#if !DEBUG
             this.Name = name;
+#endif
             return this;
         }
-#endif
 
-        /// <summary>
-        /// Handle errors for the promise. 
-        /// </summary>
-        public IPromise Catch(Action<Exception> onRejected)
+            /// <summary>
+            /// Handle errors for the promise. 
+            /// </summary>
+            public IPromise Catch(Action<Exception> onRejected)
         {
             //            Argument.NotNull(() => onRejected);
 
@@ -812,7 +810,7 @@ namespace RSG
             // Otherwise there is now way to get the converted value to pass to the resulting promise.
             //            Argument.NotNull(() => onResolved);
 
-            var resultPromise = new Promise<ConvertedT>();
+            var resultPromise = Promise<ConvertedT>.Create();
 #if !DEBUG
             resultPromise.WithName(Name);
 #endif
@@ -1256,7 +1254,7 @@ namespace RSG
             //            Argument.NotNull(() => ex);
 
             var promise = new Promise(PromiseState.Rejected);
-            PromiseValueContainers.CreateEx(promise.id, ex);
+            PromiseContainers.ChagneEx(promise.id, ex);
             return promise;
         }
 

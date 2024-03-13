@@ -10,12 +10,12 @@ namespace RSG.Tests.A__Spec
         [Fact]
         public void When_pending_a_promise_may_transition_to_either_the_fulfilled_or_rejected_state()
         {
-            var pendingPromise1 = new Promise<object>();
+            var pendingPromise1 = Promise<object>.Create();
             Assert.Equal(PromiseState.Pending, pendingPromise1.CurState);
             pendingPromise1.Resolve(new object());
             Assert.Equal(PromiseState.Resolved, pendingPromise1.CurState);
         
-            var pendingPromise2 = new Promise<object>();
+            var pendingPromise2 = Promise<object>.Create();
             Assert.Equal(PromiseState.Pending, pendingPromise2.CurState);
             pendingPromise2.Reject(new Exception());
             Assert.Equal(PromiseState.Rejected, pendingPromise2.CurState);
@@ -28,7 +28,7 @@ namespace RSG.Tests.A__Spec
             [Fact]
             public void _must_not_transition_to_any_other_state()
             {
-                var fulfilledPromise = new Promise<object>();
+                var fulfilledPromise = Promise<object>.Create();
                 fulfilledPromise.Resolve(new object());
 
                 Assert.Throws<PromiseStateException>(() => fulfilledPromise.Reject(new Exception()));
@@ -41,7 +41,7 @@ namespace RSG.Tests.A__Spec
             public void _must_have_a_value_which_must_not_change()
             {
                 var promisedValue = new object();
-                var fulfilledPromise = new Promise<object>();
+                var fulfilledPromise = Promise<object>.Create();
                 var handled = 0;
 
                 fulfilledPromise.Then(v =>
@@ -65,7 +65,7 @@ namespace RSG.Tests.A__Spec
             [Fact]
             public void _must_not_transition_to_any_other_state()
             {
-                var rejectedPromise = new Promise<object>();
+                var rejectedPromise = Promise<object>.Create();
                 rejectedPromise.Reject(new Exception());
 
                 Assert.Throws<PromiseStateException>(() => rejectedPromise.Resolve(new object()));
@@ -77,7 +77,7 @@ namespace RSG.Tests.A__Spec
             [Fact]         
             public void _must_have_a_reason_which_must_not_change()
             {
-                var rejectedPromise = new Promise<object>();
+                var rejectedPromise = Promise<object>.Create();
                 var reason = new Exception();
                 var handled = 0;
 
