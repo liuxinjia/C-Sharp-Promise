@@ -125,10 +125,10 @@ namespace RSG.Tests
 
             var completed = 0;
             const int promisedValue = -10;
-            
+
             promise.Resolve(promisedValue);
 
-            promise.Then(v => 
+            promise.Then(v =>
             {
                 Assert.Equal(promisedValue, v);
                 ++completed;
@@ -354,8 +354,8 @@ namespace RSG.Tests
         public void chain_multiple_promises_using_all_and_convert_to_non_value_promise()
         {
             var promise = new Promise<string>();
-            var chainedPromise1 = new Promise();
-            var chainedPromise2 = new Promise();
+            var chainedPromise1 = Promise.Create();
+            var chainedPromise2 = Promise.Create();
 
             var completed = 0;
 
@@ -744,7 +744,7 @@ namespace RSG.Tests
 
             promise.Resolve(promisedValue);
 
-            Assert.Equal(1, completed);           
+            Assert.Equal(1, completed);
         }
 
         [Fact]
@@ -821,7 +821,7 @@ namespace RSG.Tests
         public void can_chain_promise_and_convert_to_non_value_promise()
         {
             var promise = new Promise<int>();
-            var chainedPromise = new Promise();
+            var chainedPromise = Promise.Create();
 
             const int promisedValue = 15;
             var completed = 0;
@@ -969,7 +969,7 @@ namespace RSG.Tests
             var promise = new Promise<int>((resolve, reject) => resolve(5));
 
             var completed = 0;
-            promise.Then(v => 
+            promise.Then(v =>
             {
                 Assert.Equal(5, v);
                 ++completed;
@@ -1011,8 +1011,9 @@ namespace RSG.Tests
             });
 
             Assert.Equal(1, completed);
-        }        
+        }
 
+#if !DEBUG
         [Fact]
         public void unhandled_exception_is_propagated_via_event()
         {
@@ -1044,6 +1045,7 @@ namespace RSG.Tests
                 Promise.UnhandledException -= handler;
             }
         }
+#endif
 
         [Fact]
         public void exception_in_done_callback_is_propagated_via_event()
@@ -1091,7 +1093,7 @@ namespace RSG.Tests
             {
                 promise
                     .Then(a => throw ex)
-                    .Catch(_ => 
+                    .Catch(_ =>
                     {
                         // Catch the error.
                     })
@@ -1292,7 +1294,7 @@ namespace RSG.Tests
             var promise = new Promise<int>();
             var callback = 0;
 
-            promise.ContinueWith(() => 
+            promise.ContinueWith(() =>
             {
                 ++callback;
                 return Promise.Resolved();
@@ -1310,12 +1312,12 @@ namespace RSG.Tests
             var promise = new Promise<int>();
             var callback = 0;
             const int expectedValue = 42;
-            promise.ContinueWith(() => 
+            promise.ContinueWith(() =>
             {
                 ++callback;
                 return Promise<int>.Resolved(expectedValue);
             })
-            .Then(x => 
+            .Then(x =>
             {
                 Assert.Equal(expectedValue, x);
                 ++callback;

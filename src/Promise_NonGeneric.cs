@@ -17,10 +17,12 @@ namespace RSG
         /// </summary>
         int Id { get; }
 
+#if !DEBUG
         /// <summary>
         /// Set the name of the promise, useful for debugging.
         /// </summary>
         IPromise WithName(string name);
+#endif
 
         /// <summary>
         /// Completes the promise. 
@@ -191,10 +193,12 @@ namespace RSG
         /// </summary>
         int Id { get; }
 
+#if !DEBUG
         /// <summary>
         /// Human-readable name for the promise.
         /// </summary>
         string Name { get; }
+#endif
     }
 
     /// <summary>
@@ -204,7 +208,7 @@ namespace RSG
     {
         internal ExceptionEventArgs(Exception exception)
         {
-//            Argument.NotNull(() => exception);
+            //            Argument.NotNull(() => exception);
 
             this.Exception = exception;
         }
@@ -249,7 +253,11 @@ namespace RSG
     /// Implements a non-generic C# promise, this is a promise that simply resolves without delivering a value.
     /// https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Promise
     /// </summary>
+#if !DEBUG
     public class Promise : IPromise, IPendingPromise, IPromiseInfo
+#else
+    public struct Promise : IPromise, IPendingPromise, IPromiseInfo
+#endif
     {
         /// <summary>
         /// Set to true to enable tracking of promises.
@@ -275,22 +283,18 @@ namespace RSG
         /// <summary>
         /// Information about pending promises.
         /// </summary>
-        internal static readonly HashSet<IPromiseInfo> PendingPromises = 
-            new HashSet<IPromiseInfo>();
+        internal static readonly HashSet<int> PendingPromises =
+            new HashSet<int>();
 
         /// <summary>
         /// Information about pending promises, useful for debugging.
         /// This is only populated when 'EnablePromiseTracking' is set to true.
         /// </summary>
-        public static IEnumerable<IPromiseInfo> GetPendingPromises()
+        public static IEnumerable<int> GetPendingPromises()
         {
             return PendingPromises;
         }
 
-        /// <summary>
-        /// The exception when the promise is rejected.
-        /// </summary>
-        private Exception rejectionException;
 
         /// <summary>
         /// Error handlers.
@@ -330,35 +334,50 @@ namespace RSG
 
         private readonly int id;
 
+#if !DEBUG
         /// <summary>
         /// Name of the promise, when set, useful for debugging.
         /// </summary>
         public string Name { get; private set; }
+#endif
+
+        /// <summary>
+        /// The exception when the promise is rejected.
+        /// </summary>
+        private Exception rejectionException
+        {
+            get
+            {
+                PromiseValueContainers.TryGetEx(id, out var e);
+                return e;
+            }
+        }
 
         /// <summary>
         /// Tracks the current state of the promise.
         /// </summary>
-        public PromiseState CurState { get; private set; }
-
-        public Promise()
+        public PromiseState CurState
         {
-            this.CurState = PromiseState.Pending;
-            this.id = NextId();
-            if (EnablePromiseTracking)
+            get
             {
-                PendingPromises.Add(this);
+                PromiseValueContainers.TryGetState(id, out var state);
+                return state;
+            }
+            set
+            {
+                PromiseValueContainers.ChangeState(id, value);
             }
         }
 
-        public Promise(Action<Action, Action<Exception>> resolver)
-        {
-            this.CurState = PromiseState.Pending;
-            this.id = NextId();
-            if (EnablePromiseTracking)
-            {
-                PendingPromises.Add(this);
-            }
 
+        public static Promise Create(PromiseState initialState = PromiseState.Pending)
+        {
+            var promise = new Promise(initialState);
+            return promise;
+        }
+
+        public Promise(Action<Action, Action<Exception>> resolver) : this(PromiseState.Pending)
+        {
             try
             {
                 resolver(Resolve, Reject);
@@ -371,8 +390,20 @@ namespace RSG
 
         private Promise(PromiseState initialState)
         {
-            CurState = initialState;
+            resolveHandlers = new List<ResolveHandler>();
+            rejectHandlers = new List<RejectHandler>();
+            progressHandlers = new List<ProgressHandler>();
+#if !DEBUG
+            this.Name = string.Empty;
+#endif
+
             id = NextId();
+            CurState = initialState;
+
+            if (EnablePromiseTracking)
+            {
+                PendingPromises.Add(this.id);
+            }
         }
 
         /// <summary>
@@ -435,8 +466,8 @@ namespace RSG
         /// </summary>
         private void InvokeRejectHandler(Action<Exception> callback, IRejectable rejectable, Exception value)
         {
-//            Argument.NotNull(() => callback);
-//            Argument.NotNull(() => rejectable);
+            //            Argument.NotNull(() => callback);
+            //            Argument.NotNull(() => rejectable);
 
             try
             {
@@ -453,8 +484,8 @@ namespace RSG
         /// </summary>
         private void InvokeResolveHandler(Action callback, IRejectable rejectable)
         {
-//            Argument.NotNull(() => callback);
-//            Argument.NotNull(() => rejectable);
+            //            Argument.NotNull(() => callback);
+            //            Argument.NotNull(() => rejectable);
 
             try
             {
@@ -471,8 +502,8 @@ namespace RSG
         /// </summary>
         private void InvokeProgressHandler(Action<float> callback, IRejectable rejectable, float progress)
         {
-//            Argument.NotNull(() => callback);
-//            Argument.NotNull(() => rejectable);
+            //            Argument.NotNull(() => callback);
+            //            Argument.NotNull(() => rejectable);
 
             try
             {
@@ -499,7 +530,7 @@ namespace RSG
         /// </summary>
         private void InvokeRejectHandlers(Exception ex)
         {
-//            Argument.NotNull(() => ex);
+            //            Argument.NotNull(() => ex);
 
             if (rejectHandlers != null)
             {
@@ -541,26 +572,26 @@ namespace RSG
         /// </summary>
         public void Reject(Exception ex)
         {
-//            Argument.NotNull(() => ex);
+            //            Argument.NotNull(() => ex);
 
             if (CurState != PromiseState.Pending)
             {
                 throw new PromiseStateException(
-                    "Attempt to reject a promise that is already in state: " + CurState 
-                    + ", a promise can only be rejected when it is still in state: " 
+                    "Attempt to reject a promise that is already in state: " + CurState
+                    + ", a promise can only be rejected when it is still in state: "
                     + PromiseState.Pending
                 );
             }
 
-            rejectionException = ex;
+            PromiseValueContainers.CreateEx(id, ex);
             CurState = PromiseState.Rejected;
 
             if (EnablePromiseTracking)
             {
-                PendingPromises.Remove(this);
+                PendingPromises.Remove(this.id);
             }
 
-            InvokeRejectHandlers(ex);            
+            InvokeRejectHandlers(ex);
         }
 
 
@@ -572,8 +603,8 @@ namespace RSG
             if (CurState != PromiseState.Pending)
             {
                 throw new PromiseStateException(
-                    "Attempt to resolve a promise that is already in state: " + CurState 
-                    + ", a promise can only be resolved when it is still in state: " 
+                    "Attempt to resolve a promise that is already in state: " + CurState
+                    + ", a promise can only be resolved when it is still in state: "
                     + PromiseState.Pending
                 );
             }
@@ -582,7 +613,7 @@ namespace RSG
 
             if (EnablePromiseTracking)
             {
-                PendingPromises.Remove(this);
+                PendingPromises.Remove(this.id);
             }
 
             InvokeResolveHandlers();
@@ -597,8 +628,8 @@ namespace RSG
             if (CurState != PromiseState.Pending)
             {
                 throw new PromiseStateException(
-                    "Attempt to report progress on a promise that is already in state: " 
-                    + CurState + ", a promise can only report progress when it is still in state: " 
+                    "Attempt to report progress on a promise that is already in state: "
+                    + CurState + ", a promise can only report progress when it is still in state: "
                     + PromiseState.Pending
                 );
             }
@@ -615,9 +646,13 @@ namespace RSG
         public void Done(Action onResolved, Action<Exception> onRejected)
         {
             Then(onResolved, onRejected)
+#if !DEBUG
                 .Catch(ex =>
-                    PropagateUnhandledException(this, ex)
+                    Promise.PropagateUnhandledException(this, ex)
                 );
+#else
+                ;
+#endif
         }
 
         /// <summary>
@@ -628,9 +663,13 @@ namespace RSG
         public void Done(Action onResolved)
         {
             Then(onResolved)
-                .Catch(ex => 
-                    PropagateUnhandledException(this, ex)
+#if !DEBUG
+                .Catch(ex =>
+                    Promise.PropagateUnhandledException(this, ex)
                 );
+#else
+                ;
+#endif
         }
 
         /// <summary>
@@ -641,9 +680,15 @@ namespace RSG
             if (CurState == PromiseState.Resolved)
                 return;
 
-            Catch(ex => PropagateUnhandledException(this, ex));
+#if !DEBUG
+                Catch(ex =>
+                    Promise.PropagateUnhandledException(this, ex)
+                );
+#else
+#endif
         }
 
+#if !DEBUG
         /// <summary>
         /// Set the name of the promise, useful for debugging.
         /// </summary>
@@ -652,21 +697,24 @@ namespace RSG
             this.Name = name;
             return this;
         }
+#endif
 
         /// <summary>
         /// Handle errors for the promise. 
         /// </summary>
         public IPromise Catch(Action<Exception> onRejected)
         {
-//            Argument.NotNull(() => onRejected);
+            //            Argument.NotNull(() => onRejected);
 
             if (CurState == PromiseState.Resolved)
             {
                 return this;
             }
 
-            var resultPromise = new Promise();
+            var resultPromise = Promise.Create();
+#if !DEBUG
             resultPromise.WithName(Name);
+#endif
 
             Action resolveHandler = () => resultPromise.Resolve();
 
@@ -753,7 +801,7 @@ namespace RSG
                 try
                 {
                     return onResolved();
-                } 
+                }
                 catch (Exception ex)
                 {
                     return Promise<ConvertedT>.Rejected(ex);
@@ -765,7 +813,9 @@ namespace RSG
             //            Argument.NotNull(() => onResolved);
 
             var resultPromise = new Promise<ConvertedT>();
+#if !DEBUG
             resultPromise.WithName(Name);
+#endif
 
             Action resolveHandler = () =>
             {
@@ -827,8 +877,10 @@ namespace RSG
                 }
             }
 
-            var resultPromise = new Promise();
+            var resultPromise = Promise.Create();
+#if !DEBUG
             resultPromise.WithName(Name);
+#endif
 
             Action resolveHandler;
             if (onResolved != null)
@@ -889,8 +941,10 @@ namespace RSG
                 }
             }
 
-            var resultPromise = new Promise();
+            var resultPromise = Promise.Create();
+#if !DEBUG
             resultPromise.WithName(Name);
+#endif
 
             Action resolveHandler;
             if (onResolved != null)
@@ -1009,8 +1063,10 @@ namespace RSG
             }
 
             var remainingCount = promisesArray.Length;
-            var resultPromise = new Promise();
+            var resultPromise = Promise.Create();
+#if !DEBUG
             resultPromise.WithName("All");
+#endif
             var progress = new float[remainingCount];
 
             promisesArray.Each((promise, index) =>
@@ -1075,7 +1131,7 @@ namespace RSG
         /// </summary>
         public static IPromise Sequence(IEnumerable<Func<IPromise>> fns)
         {
-            var promise = new Promise();
+            var promise = Promise.Create();
 
             int count = 0;
 
@@ -1147,8 +1203,10 @@ namespace RSG
                 throw new InvalidOperationException("At least 1 input promise must be provided for Race");
             }
 
-            var resultPromise = new Promise();
+            var resultPromise = Promise.Create();
+#if !DEBUG
             resultPromise.WithName("Race");
+#endif
 
             var progress = new float[promisesArray.Length];
 
@@ -1195,10 +1253,10 @@ namespace RSG
         /// </summary>
         public static IPromise Rejected(Exception ex)
         {
-//            Argument.NotNull(() => ex);
+            //            Argument.NotNull(() => ex);
 
             var promise = new Promise(PromiseState.Rejected);
-            promise.rejectionException = ex;
+            PromiseValueContainers.CreateEx(promise.id, ex);
             return promise;
         }
 
@@ -1217,15 +1275,21 @@ namespace RSG
                 }
             }
 
-            var promise = new Promise();
+            var promise = Promise.Create();
+#if !DEBUG
             promise.WithName(Name);
+#endif
 
             this.Then((Action)promise.Resolve);
-            this.Catch(e => {
-                try {
+            this.Catch(e =>
+            {
+                try
+                {
                     onComplete();
                     promise.Reject(e);
-                } catch (Exception ne) {
+                }
+                catch (Exception ne)
+                {
                     promise.Reject(ne);
                 }
             });
@@ -1235,8 +1299,10 @@ namespace RSG
 
         public IPromise ContinueWith(Func<IPromise> onComplete)
         {
-            var promise = new Promise();
+            var promise = Promise.Create();
+#if !DEBUG
             promise.WithName(Name);
+#endif
 
             this.Then((Action)promise.Resolve);
             this.Catch(e => promise.Resolve());
@@ -1246,8 +1312,10 @@ namespace RSG
 
         public IPromise<ConvertedT> ContinueWith<ConvertedT>(Func<IPromise<ConvertedT>> onComplete)
         {
-            var promise = new Promise();
+            var promise = Promise.Create();
+#if !DEBUG
             promise.WithName(Name);
+#endif
 
             this.Then((Action)promise.Resolve);
             this.Catch(e => promise.Resolve());

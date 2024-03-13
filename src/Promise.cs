@@ -271,7 +271,7 @@ namespace RSG
 
             if (Promise.EnablePromiseTracking)
             {
-                Promise.PendingPromises.Add(this);
+                Promise.PendingPromises.Add(this.id);
             }
         }
 
@@ -282,7 +282,7 @@ namespace RSG
 
             if (Promise.EnablePromiseTracking)
             {
-                Promise.PendingPromises.Add(this);
+                Promise.PendingPromises.Add(this.id);
             }
 
             try
@@ -439,7 +439,7 @@ namespace RSG
 
             if (Promise.EnablePromiseTracking)
             {
-                Promise.PendingPromises.Remove(this);
+                Promise.PendingPromises.Remove(this.id);
             }
 
             InvokeRejectHandlers(ex);
@@ -464,7 +464,7 @@ namespace RSG
 
             if (Promise.EnablePromiseTracking)
             {
-                Promise.PendingPromises.Remove(this);
+                Promise.PendingPromises.Remove(this.id);
             }
 
             InvokeResolveHandlers(value);
@@ -495,9 +495,13 @@ namespace RSG
         public void Done(Action<PromisedT> onResolved, Action<Exception> onRejected)
         {
             Then(onResolved, onRejected)
+#if !DEBUG
                 .Catch(ex =>
                     Promise.PropagateUnhandledException(this, ex)
                 );
+#else
+                ;
+#endif
         }
 
         /// <summary>
@@ -545,8 +549,10 @@ namespace RSG
                 return Promise.Resolved();
             }
 
-            var resultPromise = new Promise();
+            var resultPromise = Promise.Create();
+#if !DEBUG
             resultPromise.WithName(Name);
+#endif
 
             Action<PromisedT> resolveHandler = _ => resultPromise.Resolve();
 
@@ -745,8 +751,10 @@ namespace RSG
                 }
             }
 
-            var resultPromise = new Promise();
+            var resultPromise = Promise.Create();
+#if !DEBUG
             resultPromise.WithName(Name);
+#endif
 
             Action<PromisedT> resolveHandler = v =>
             {
@@ -806,8 +814,10 @@ namespace RSG
                 }
             }
 
-            var resultPromise = new Promise();
+            var resultPromise = Promise.Create();
+#if !DEBUG
             resultPromise.WithName(Name);
+#endif
 
             Action<PromisedT> resolveHandler = v =>
             {
@@ -1167,8 +1177,10 @@ namespace RSG
 
         public IPromise ContinueWith(Func<IPromise> onComplete)
         {
-            var promise = new Promise();
+            var promise = Promise.Create();
+#if !DEBUG
             promise.WithName(Name);
+#endif
 
             this.Then(x => promise.Resolve());
             this.Catch(e => promise.Resolve());
@@ -1178,8 +1190,10 @@ namespace RSG
 
         public IPromise<ConvertedT> ContinueWith<ConvertedT>(Func<IPromise<ConvertedT>> onComplete)
         {
-            var promise = new Promise();
+            var promise = Promise.Create();
+#if !DEBUG
             promise.WithName(Name);
+#endif
 
             this.Then(x => promise.Resolve());
             this.Catch(e => promise.Resolve());

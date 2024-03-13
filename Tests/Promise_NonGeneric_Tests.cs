@@ -38,7 +38,7 @@ namespace RSG.Tests
         [Fact]
         public void exception_is_thrown_for_reject_after_reject()
         {
-            var promise = new Promise();
+            var promise = Promise.Create();
 
             promise.Reject(new Exception());
 
@@ -50,7 +50,7 @@ namespace RSG.Tests
         [Fact]
         public void exception_is_thrown_for_reject_after_resolve()
         {
-            var promise = new Promise();
+            var promise = Promise.Create();
 
             promise.Resolve();
 
@@ -62,7 +62,7 @@ namespace RSG.Tests
         [Fact]
         public void exception_is_thrown_for_resolve_after_reject()
         {
-            var promise = new Promise();
+            var promise = Promise.Create();
 
             promise.Reject(new Exception());
 
@@ -72,7 +72,7 @@ namespace RSG.Tests
         [Fact]
         public void can_resolve_promise_and_trigger_then_handler()
         {
-            var promise = new Promise();
+            var promise = Promise.Create();
 
             var completed = 0;
 
@@ -86,7 +86,7 @@ namespace RSG.Tests
         [Fact]
         public void exception_is_thrown_for_resolve_after_resolve()
         {
-            var promise = new Promise();
+            var promise = Promise.Create();
 
             promise.Resolve();
 
@@ -96,7 +96,7 @@ namespace RSG.Tests
         [Fact]
         public void can_resolve_promise_and_trigger_multiple_then_handlers_in_order()
         {
-            var promise = new Promise();
+            var promise = Promise.Create();
 
             var completed = 0;
 
@@ -111,7 +111,7 @@ namespace RSG.Tests
         [Fact]
         public void can_resolve_promise_and_trigger_then_handler_with_callback_registration_after_resolve()
         {
-            var promise = new Promise();
+            var promise = Promise.Create();
 
             var completed = 0;
 
@@ -125,7 +125,7 @@ namespace RSG.Tests
         [Fact]
         public void can_reject_promise_and_trigger_error_handler()
         {
-            var promise = new Promise();
+            var promise = Promise.Create();
 
             var ex = new Exception();
             var completed = 0;
@@ -143,7 +143,7 @@ namespace RSG.Tests
         [Fact]
         public void can_reject_promise_and_trigger_multiple_error_handlers_in_order()
         {
-            var promise = new Promise();
+            var promise = Promise.Create();
 
             var ex = new Exception();
             var completed = 0;
@@ -167,7 +167,7 @@ namespace RSG.Tests
         [Fact]
         public void can_reject_promise_and_trigger_error_handler_with_registration_after_reject()
         {
-            var promise = new Promise();
+            var promise = Promise.Create();
 
             var ex = new Exception();
             promise.Reject(ex);
@@ -185,7 +185,7 @@ namespace RSG.Tests
         [Fact]
         public void error_handler_is_not_invoked_for_resolved_promised()
         {
-            var promise = new Promise();
+            var promise = Promise.Create();
 
             promise.Catch(e => throw new Exception("This shouldn't happen"));
 
@@ -195,7 +195,7 @@ namespace RSG.Tests
         [Fact]
         public void then_handler_is_not_invoked_for_rejected_promise()
         {
-            var promise = new Promise();
+            var promise = Promise.Create();
 
             promise.Then(() => throw new Exception("This shouldn't happen"));
 
@@ -205,9 +205,9 @@ namespace RSG.Tests
         [Fact]
         public void chain_multiple_promises_using_all()
         {
-            var promise = new Promise();
-            var chainedPromise1 = new Promise();
-            var chainedPromise2 = new Promise();
+            var promise = Promise.Create();
+            var chainedPromise1 = Promise.Create();
+            var chainedPromise2 = Promise.Create();
 
             var completed = 0;
 
@@ -237,7 +237,7 @@ namespace RSG.Tests
         [Fact]
         public void chain_multiple_promises_using_all_that_are_resolved_out_of_order()
         {
-            var promise = new Promise();
+            var promise = Promise.Create();
             var chainedPromise1 = new Promise<int>();
             var chainedPromise2 = new Promise<int>();
             const int chainedResult1 = 10;
@@ -279,7 +279,7 @@ namespace RSG.Tests
         [Fact]
         public void chain_multiple_value_promises_using_all_resolved_out_of_order()
         {
-            var promise = new Promise();
+            var promise = Promise.Create();
             var chainedPromise1 = new Promise<int>();
             var chainedPromise2 = new Promise<int>();
             const int chainedResult1 = 10;
@@ -321,8 +321,8 @@ namespace RSG.Tests
         [Fact]
         public void combined_promise_is_resolved_when_children_are_resolved()
         {
-            var promise1 = new Promise();
-            var promise2 = new Promise();
+            var promise1 = Promise.Create();
+            var promise2 = Promise.Create();
 
             TestHelpers.VerifyDoesntThrowUnhandledException(() =>
             {
@@ -342,8 +342,8 @@ namespace RSG.Tests
         [Fact]
         public void combined_promise_is_rejected_when_first_promise_is_rejected()
         {
-            var promise1 = new Promise();
-            var promise2 = new Promise();
+            var promise1 = Promise.Create();
+            var promise2 = Promise.Create();
 
             TestHelpers.VerifyDoesntThrowUnhandledException(() =>
             {
@@ -362,10 +362,11 @@ namespace RSG.Tests
         [Fact]
         public void combined_promise_is_rejected_when_second_promise_is_rejected()
         {
-            var promise1 = new Promise();
-            var promise2 = new Promise();
+            var promise1 = Promise.Create();
+            var promise2 = Promise.Create();
 
-            TestHelpers.VerifyDoesntThrowUnhandledException(() => {
+            TestHelpers.VerifyDoesntThrowUnhandledException(() =>
+            {
                 var all = Promise.All(EnumerableExt.FromItems<IPromise>(promise1, promise2));
 
                 var errors = 0;
@@ -381,8 +382,8 @@ namespace RSG.Tests
         [Fact]
         public void combined_promise_is_rejected_when_both_promises_are_rejected()
         {
-            var promise1 = new Promise();
-            var promise2 = new Promise();
+            var promise1 = Promise.Create();
+            var promise2 = Promise.Create();
 
             TestHelpers.VerifyDoesntThrowUnhandledException(() =>
             {
@@ -439,7 +440,7 @@ namespace RSG.Tests
             Exception caughtException = null;
             Exception exception = new Exception();
 
-            var promiseA = new Promise();
+            var promiseA = Promise.Create();
             var promise = Promise
                 .All(promiseA, Promise.Rejected(exception))
                 .Then(() => resolved = true)
@@ -450,7 +451,7 @@ namespace RSG.Tests
                 });
             promiseA.ReportProgress(0.5f);
             promiseA.Resolve();
-            
+
             Assert.Equal(false, resolved);
             Assert.Equal(true, rejected);
             Assert.Equal(exception, caughtException);
@@ -459,7 +460,7 @@ namespace RSG.Tests
         [Fact]
         public void exception_thrown_during_transform_rejects_promise()
         {
-            var promise = new Promise();
+            var promise = Promise.Create();
 
             var errors = 0;
             var ex = new Exception();
@@ -481,8 +482,8 @@ namespace RSG.Tests
         [Fact]
         public void can_chain_promise()
         {
-            var promise = new Promise();
-            var chainedPromise = new Promise();
+            var promise = Promise.Create();
+            var chainedPromise = Promise.Create();
 
             var completed = 0;
 
@@ -499,7 +500,7 @@ namespace RSG.Tests
         [Fact]
         public void can_chain_promise_and_convert_to_promise_that_yields_a_value()
         {
-            var promise = new Promise();
+            var promise = Promise.Create();
             var chainedPromise = new Promise<string>();
             const string chainedPromiseValue = "some-value";
 
@@ -507,7 +508,7 @@ namespace RSG.Tests
 
             promise
                 .Then(() => chainedPromise)
-                .Then(v => 
+                .Then(v =>
                 {
                     Assert.Equal(chainedPromiseValue, v);
 
@@ -523,7 +524,7 @@ namespace RSG.Tests
         [Fact]
         public void exception_thrown_in_chain_rejects_resulting_promise()
         {
-            var promise = new Promise();
+            var promise = Promise.Create();
 
             var ex = new Exception();
             var errors = 0;
@@ -545,8 +546,8 @@ namespace RSG.Tests
         [Fact]
         public void rejection_of_source_promise_rejects_chained_promise()
         {
-            var promise = new Promise();
-            var chainedPromise = new Promise();
+            var promise = Promise.Create();
+            var chainedPromise = Promise.Create();
 
             var ex = new Exception();
             var errors = 0;
@@ -568,8 +569,8 @@ namespace RSG.Tests
         [Fact]
         public void race_is_resolved_when_first_promise_is_resolved_first()
         {
-            var promise1 = new Promise();
-            var promise2 = new Promise();
+            var promise1 = Promise.Create();
+            var promise2 = Promise.Create();
 
             var completed = 0;
 
@@ -588,8 +589,8 @@ namespace RSG.Tests
         [Fact]
         public void race_is_resolved_when_second_promise_is_resolved_first()
         {
-            var promise1 = new Promise();
-            var promise2 = new Promise();
+            var promise1 = Promise.Create();
+            var promise2 = Promise.Create();
 
             var completed = 0;
 
@@ -608,8 +609,8 @@ namespace RSG.Tests
         [Fact]
         public void race_is_rejected_when_first_promise_is_rejected_first()
         {
-            var promise1 = new Promise();
-            var promise2 = new Promise();
+            var promise1 = Promise.Create();
+            var promise2 = Promise.Create();
 
             Exception ex = null;
 
@@ -629,8 +630,8 @@ namespace RSG.Tests
         [Fact]
         public void race_is_rejected_when_second_promise_is_rejected_first()
         {
-            var promise1 = new Promise();
-            var promise2 = new Promise();
+            var promise1 = Promise.Create();
+            var promise2 = Promise.Create();
 
             Exception ex = null;
 
@@ -665,7 +666,7 @@ namespace RSG.Tests
             var completed = 0;
 
             Promise
-                .Sequence(() => new Promise())
+                .Sequence(() => Promise.Create())
                 .Then(() => ++completed);
 
             Assert.Equal(0, completed);
@@ -691,7 +692,7 @@ namespace RSG.Tests
             Promise
                 .Sequence(
                     Promise.Resolved,
-                    () => new Promise()
+                    () => Promise.Create()
                 )
                 .Then(() => ++completed);
 
@@ -764,7 +765,7 @@ namespace RSG.Tests
 
             Promise
                 .Sequence(
-                    () => 
+                    () =>
                     {
                         ++completed;
                         return Promise.Resolved();
@@ -832,10 +833,11 @@ namespace RSG.Tests
             Assert.Equal(1, completed);
         }
 
+#if !DEBUG
         [Fact]
         public void unhandled_exception_is_propagated_via_event()
         {
-            var promise = new Promise();
+            var promise = Promise.Create();
             var ex = new Exception();
             var eventRaised = 0;
 
@@ -863,11 +865,13 @@ namespace RSG.Tests
                 Promise.UnhandledException -= handler;
             }
         }
+#endif
 
+#if !DEBUG
         [Fact]
         public void exception_in_done_callback_is_propagated_via_event()
         {
-            var promise = new Promise();
+            var promise = Promise.Create();
             var ex = new Exception();
             var eventRaised = 0;
 
@@ -894,11 +898,12 @@ namespace RSG.Tests
                 Promise.UnhandledException -= handler;
             }
         }
+#endif
 
         [Fact]
         public void handled_exception_is_not_propagated_via_event()
         {
-            var promise = new Promise();
+            var promise = Promise.Create();
             var ex = new Exception();
             var eventRaised = 0;
 
@@ -930,7 +935,7 @@ namespace RSG.Tests
         [Fact]
         public void can_handle_Done_onResolved()
         {
-            var promise = new Promise();
+            var promise = Promise.Create();
             var callback = 0;
 
             promise.Done(() => ++callback);
@@ -943,7 +948,7 @@ namespace RSG.Tests
         [Fact]
         public void can_handle_Done_onResolved_with_onReject()
         {
-            var promise = new Promise();
+            var promise = Promise.Create();
             var callback = 0;
             var errorCallback = 0;
 
@@ -964,7 +969,7 @@ namespace RSG.Tests
         [Fact]
         public void exception_during_Done_onResolved_triggers_error_hander()
         {
-            var promise = new Promise();
+            var promise = Promise.Create();
             var callback = 0;
             var errorCallback = 0;
             var expectedValue = 5;
@@ -997,7 +1002,7 @@ namespace RSG.Tests
         [Fact]
         public void exception_during_Then_onResolved_triggers_error_hander()
         {
-            var promise = new Promise();
+            var promise = Promise.Create();
             var callback = 0;
             var errorCallback = 0;
             var expectedException = new Exception();
@@ -1023,7 +1028,7 @@ namespace RSG.Tests
         [Fact]
         public void inner_exception_handled_by_outer_promise()
         {
-            var promise = new Promise();
+            var promise = Promise.Create();
             var errorCallback = 0;
             var expectedException = new Exception();
 
@@ -1099,8 +1104,8 @@ namespace RSG.Tests
         [Fact]
         public void promises_have_sequential_ids()
         {
-            var promise1 = new Promise();
-            var promise2 = new Promise();
+            var promise1 = Promise.Create();
+            var promise2 = Promise.Create();
 
             Assert.Equal(promise1.Id + 1, promise2.Id);
         }
@@ -1109,7 +1114,7 @@ namespace RSG.Tests
         [Fact]
         public void finally_is_called_after_resolve()
         {
-            var promise = new Promise();
+            var promise = Promise.Create();
             var callback = 0;
 
             promise.Finally(() => ++callback);
@@ -1122,7 +1127,7 @@ namespace RSG.Tests
         [Fact]
         public void finally_is_called_after_reject()
         {
-            var promise = new Promise();
+            var promise = Promise.Create();
             var callback = 0;
 
             promise.Finally(() => ++callback);
@@ -1135,7 +1140,7 @@ namespace RSG.Tests
         [Fact]
         public void resolved_chain_continues_after_finally()
         {
-            var promise = new Promise();
+            var promise = Promise.Create();
             var callback = 0;
 
             promise.Finally(() => ++callback)
@@ -1149,7 +1154,7 @@ namespace RSG.Tests
         [Fact]
         public void rejected_chain_rejects_after_finally()
         {
-            var promise = new Promise();
+            var promise = Promise.Create();
             var callback = 0;
 
             promise.Finally(() => ++callback)
@@ -1161,11 +1166,12 @@ namespace RSG.Tests
         }
 
         [Fact]
-        public void rejected_chain_continues_after_ContinueWith_returning_non_value_promise() {
-            var promise = new Promise();
+        public void rejected_chain_continues_after_ContinueWith_returning_non_value_promise()
+        {
+            var promise = Promise.Create();
             var callback = 0;
 
-            promise.ContinueWith(() => 
+            promise.ContinueWith(() =>
             {
                 ++callback;
                 return Promise.Resolved();
@@ -1178,16 +1184,19 @@ namespace RSG.Tests
         }
 
         [Fact]
-        public void rejected_chain_continues_after_ContinueWith_returning_value_promise() {
-            var promise = new Promise();
+        public void rejected_chain_continues_after_ContinueWith_returning_value_promise()
+        {
+            var promise = Promise.Create();
             var callback = 0;
             const string expectedValue = "foo";
 
-            promise.ContinueWith(() => {
+            promise.ContinueWith(() =>
+            {
                 ++callback;
                 return Promise<string>.Resolved("foo");
             })
-            .Then(x => {
+            .Then(x =>
+            {
                 Assert.Equal(expectedValue, x);
                 ++callback;
             });
@@ -1203,7 +1212,7 @@ namespace RSG.Tests
         {
             //NOTE: Also tests that the new exception is passed thru promise chain
 
-            var promise = new Promise();
+            var promise = Promise.Create();
             var callback = 0;
             var expectedException = new Exception("Expected");
 
@@ -1228,7 +1237,7 @@ namespace RSG.Tests
         {
             //NOTE: Also tests that the new exception is passed thru promise chain
 
-            var promise = new Promise();
+            var promise = Promise.Create();
             var callback = 0;
             var expectedException = new Exception("Expected");
 
@@ -1253,7 +1262,7 @@ namespace RSG.Tests
         {
             //NOTE: Also tests that the new exception is passed through promise chain
 
-            var promise = new Promise();
+            var promise = Promise.Create();
             var callback = 0;
             var expectedException = new Exception("Expected");
 
@@ -1276,7 +1285,7 @@ namespace RSG.Tests
         [Fact]
         public void can_chain_promise_after_ContinueWith()
         {
-            var promise = new Promise();
+            var promise = Promise.Create();
             const int expectedValue = 5;
             var callback = 0;
 
