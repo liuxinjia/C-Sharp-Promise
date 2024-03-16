@@ -142,7 +142,7 @@ namespace RSG
         /// </summary>
         public IPromise WaitUntil(Func<TimeData, bool> predicate)
         {
-            var promise = Promise.Create();
+            var promise = new Promise();
 
             var wait = new PredicateWait()
             {

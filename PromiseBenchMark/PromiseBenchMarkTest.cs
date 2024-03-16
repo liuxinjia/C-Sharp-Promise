@@ -14,42 +14,40 @@ namespace PromiseBenchMark
         [GlobalSetup]
         public void SetUp()
         {
-            var promise = Promise.Create();
         }
 
         [Benchmark]
         public void CreatePromise()
         {
-            var promise = Promise.Create();
-            //promise.Clear();
+            var promise = new Promise();
         }
 
-        //[Benchmark]
+        [Benchmark]
         public void ResolvePromise()
         {
-            var promise = Promise.Create();
+            var promise = new Promise();
             promise.Resolve();
             promise.Clear();
 
         }
 
-        //[Benchmark]
+        [Benchmark]
         public void RejectPromise()
         {
-            var promise = Promise.Create();
+            var promise = new Promise();
             promise.Reject(new Exception());
         }
-        //[Benchmark]
+        [Benchmark]
         public void ProgressPromise()
         {
-            var promise = Promise.Create();
+            var promise = new Promise();
             promise.ReportProgress(1f);
         }
-        //[Benchmark]
+        [Benchmark]
         public void ChainPromise()
         {
-            var promise = Promise.Create();
-            var chainedPromise = Promise.Create();
+            var promise = new Promise();
+            var chainedPromise = new Promise();
 
             var completed = 0;
 
@@ -58,6 +56,21 @@ namespace PromiseBenchMark
                 .Then(() => ++completed);
 
             promise.Resolve();
+            chainedPromise.Resolve();
+        }
+
+        [Benchmark]
+        public void can_chain_promise_and_convert_to_non_value_promise()
+        {
+            var promise = new Promise<int>();
+            var chainedPromise = new Promise();
+
+            const int promisedValue = 15;
+
+            promise
+                .Then(v => (IPromise)chainedPromise);
+
+            promise.Resolve(promisedValue);
             chainedPromise.Resolve();
         }
     }

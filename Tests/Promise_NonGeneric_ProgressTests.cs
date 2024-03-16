@@ -11,7 +11,7 @@ namespace RSG.Tests
         {
             const float expectedStep = 0.25f;
             var currentProgress = 0f;
-            var promise = Promise.Create();
+            var promise = new Promise();
 
             promise.Progress(v =>
             {
@@ -29,7 +29,7 @@ namespace RSG.Tests
         [Fact]
         public void can_handle_onProgress()
         {
-            var promise = Promise.Create();
+            var promise = new Promise();
             var progress = 0f;
 
             promise.Then(null, null, v => progress = v);
@@ -42,8 +42,8 @@ namespace RSG.Tests
         [Fact]
         public void can_handle_chained_onProgress()
         {
-            var promiseA = Promise.Create();
-            var promiseB = Promise.Create();
+            var promiseA = new Promise();
+            var promiseB = new Promise();
             var progressA = 0f;
             var progressB = 0f;
 
@@ -64,9 +64,9 @@ namespace RSG.Tests
         [Fact]
         public void can_do_progress_weighted_average()
         {
-            var promiseA = Promise.Create();
-            var promiseB = Promise.Create();
-            var promiseC = Promise.Create();
+            var promiseA = new Promise();
+            var promiseB = new Promise();
+            var promiseC = new Promise();
 
             var expectedProgress = new[] { 0.1f, 0.2f, 0.6f, 1f };
             var currentProgress = 0f;
@@ -105,8 +105,8 @@ namespace RSG.Tests
         [Fact]
         public void chain_multiple_promises_reporting_progress()
         {
-            var promiseA = Promise.Create();
-            var promiseB = Promise.Create();
+            var promiseA = new Promise();
+            var promiseB = new Promise();
             var progressA = 0f;
             var progressB = 0f;
 
@@ -128,7 +128,7 @@ namespace RSG.Tests
         [Fact]
         public void exception_is_thrown_for_progress_after_resolve()
         {
-            var promise = Promise.Create();
+            var promise = new Promise();
             promise.Resolve();
 
             Assert.Throws<PromiseStateException>(() => promise.ReportProgress(1f));
@@ -137,7 +137,7 @@ namespace RSG.Tests
         [Fact]
         public void exception_is_thrown_for_progress_after_reject()
         {
-            var promise = Promise.Create();
+            var promise = new Promise();
             promise.Reject(new Exception());
 
             Assert.Throws<PromiseStateException>(() => promise.ReportProgress(1f));
@@ -146,15 +146,15 @@ namespace RSG.Tests
         [Fact]
         public void all_progress_is_averaged()
         {
-            var promiseA = Promise.Create();
-            var promiseB = Promise.Create();
-            var promiseC = Promise.Create();
-            var promiseD = Promise.Create();
+            var promiseA = new Promise();
+            var promiseB = new Promise();
+            var promiseC = new Promise();
+            var promiseD = new Promise();
 
             int currentStep = 0;
             var expectedProgress = new[] { 0.25f, 0.50f, 0.75f, 1f };
 
-            Promise.All(string.Empty, promiseA, promiseB, promiseC, promiseD)
+            Promise.All(promiseA, promiseB, promiseC, promiseD)
                 .Progress(progress =>
                 {
                     Assert.InRange(currentStep, 0, expectedProgress.Length - 1);
@@ -174,11 +174,11 @@ namespace RSG.Tests
         [Fact]
         public void race_progress_is_maxed()
         {
-            var promiseA = Promise.Create();
-            var promiseB = Promise.Create();
+            var promiseA = new Promise();
+            var promiseB = new Promise();
             int reportCount = 0;
 
-            Promise.Race(string.Empty, promiseA, promiseB)
+            Promise.Race(promiseA, promiseB)
                 .Progress(progress =>
                 {
                     Assert.Equal(progress, 0.5f);
@@ -198,11 +198,11 @@ namespace RSG.Tests
         [Fact]
         public void all_progress_with_resolved()
         {
-            var promiseA = Promise.Create();
+            var promiseA = new Promise();
             var promiseB = Promise.Resolved();
             int reportedCount = 0;
 
-            Promise.All(string.Empty, promiseA, promiseB)
+            Promise.All(promiseA, promiseB)
                 .Progress(progress =>
                 {
                     ++reportedCount;
@@ -217,15 +217,15 @@ namespace RSG.Tests
         [Fact]
         public void sequence_reports_progress()
         {
-            var promiseA = Promise.Create();
-            var promiseB = Promise.Create();
+            var promiseA = new Promise();
+            var promiseB = new Promise();
             var promiseC = Promise.Resolved();
-            var promiseD = Promise.Create();
+            var promiseD = new Promise();
             int currentReport = 0;
             var expectedProgress = new[] { 0.125f, 0.25f, 0.25f, 0.3125f, 0.375f, 0.4375f, 0.5f, 0.75f, 0.875f, 1f };
 
             Promise
-                .Sequence(string.Empty, () => promiseA, () => promiseB, () => promiseC, () => promiseD)
+                .Sequence(() => promiseA, () => promiseB, () => promiseC, () => promiseD)
                 .Progress(v =>
                 {
                     Assert.Equal(expectedProgress[currentReport], v);

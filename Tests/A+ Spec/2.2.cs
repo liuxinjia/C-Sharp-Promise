@@ -12,7 +12,7 @@ namespace RSG.Tests.A__Spec
             [Fact]
             public void _if_onFulfilled_is_not_a_function_it_must_be_ignored()
             {
-                var promise = Promise<object>.Create();
+                var promise = new Promise<object>();
 
                 var resultPromise = promise
                     .Then(
@@ -35,7 +35,7 @@ namespace RSG.Tests.A__Spec
             [Fact]
             public void _if_onRejected_is_not_a_function_it_must_be_ignored_1()
             {
-                var promise = Promise<object>.Create();
+                var promise = new Promise<object>();
 
                 var resultPromise = promise
                     .Then(
@@ -62,7 +62,7 @@ namespace RSG.Tests.A__Spec
             [Fact]
             public void _if_onRejected_is_not_a_function_it_must_be_ignored_2()
             {
-                var promise = Promise<object>.Create();
+                var promise = new Promise<object>();
 
                 var resultPromise = promise
                     .Then(
@@ -94,7 +94,7 @@ namespace RSG.Tests.A__Spec
             [Fact]
             public void _it_must_be_called_after_promise_is_fulfilled_with_promises_value_as_its_first_argument()
             {
-                var promise = Promise<object>.Create();
+                var promise = new Promise<object>();
 
                 var promisedValue = new object();
                 var resolved = false;
@@ -117,7 +117,7 @@ namespace RSG.Tests.A__Spec
             [Fact]
             public void _it_must_not_be_called_before_promise_is_fulfilled()
             {
-                var promise = Promise<object>.Create();
+                var promise = new Promise<object>();
                 var resolved = false;
 
                 promise.Then(
@@ -132,7 +132,7 @@ namespace RSG.Tests.A__Spec
             [Fact]
             public void _it_must_not_be_called_more_than_once()
             {
-                var promise = Promise<object>.Create();
+                var promise = new Promise<object>();
                 var promisedValue = new object();
                 var resolved = 0;
 
@@ -154,7 +154,7 @@ namespace RSG.Tests.A__Spec
             [Fact]
             public void _it_must_be_called_after_promise_is_rejected_with_promises_reason_as_its_first_argument()
             {
-                var promise = Promise<object>.Create();
+                var promise = new Promise<object>();
                 var rejectedReason = new Exception();
                 var errored = false;
 
@@ -176,7 +176,7 @@ namespace RSG.Tests.A__Spec
             [Fact]
             public void _it_must_not_be_called_before_promise_is_rejected()
             {
-                var promise = Promise<object>.Create();
+                var promise = new Promise<object>();
                 var errored = false;
 
                 promise.Then(
@@ -191,7 +191,7 @@ namespace RSG.Tests.A__Spec
             [Fact]
             public void _it_must_not_be_called_more_than_once()
             {
-                var promise = Promise<object>.Create();
+                var promise = new Promise<object>();
                 var rejectedReason = new Exception();
                 var errored = 0;
 
@@ -219,7 +219,7 @@ namespace RSG.Tests.A__Spec
             [Fact]
             public void _when_promise_is_fulfilled_all_respective_onFulfilled_callbacks_must_execute_in_the_order_of_their_originating_calls_to_then_1()
             {
-                var promise = Promise<object>.Create();
+                var promise = new Promise<object>();
 
                 var order = 0;
 
@@ -244,7 +244,7 @@ namespace RSG.Tests.A__Spec
             [Fact]
             public void _when_promise_is_fulfilled_all_respective_onFulfilled_callbacks_must_execute_in_the_order_of_their_originating_calls_to_then_2()
             {
-                var promise = Promise<object>.Create();
+                var promise = new Promise<object>();
 
                 var order = 0;
 
@@ -278,7 +278,7 @@ namespace RSG.Tests.A__Spec
             [Fact]
             public void _when_promise_is_rejected_all_respective_onRejected_callbacks_must_execute_in_the_order_of_their_originating_calls_to_then()
             {
-                var promise = Promise<object>.Create();
+                var promise = new Promise<object>();
 
                 var order = 0;
 
@@ -311,7 +311,7 @@ namespace RSG.Tests.A__Spec
                 [Fact]
                 public void _when_promise1_is_resolved()
                 {
-                    var promise1 = Promise<object>.Create();
+                    var promise1 = new Promise<object>();
 
                     var promisedValue1 = new object();
                     var promisedValue2 = new object();
@@ -420,7 +420,7 @@ namespace RSG.Tests.A__Spec
                 [Fact]
                 public void _when_promise1_is_resolved_1()
                 {
-                    var promise1 = Promise<object>.Create();
+                    var promise1 = new Promise<object>();
 
                     var e = new Exception();
                     Func<object, IPromise<object>> thenHandler = _ => throw e;
@@ -446,7 +446,7 @@ namespace RSG.Tests.A__Spec
                 [Fact]
                 public void _when_promise1_is_resolved_2()
                 {
-                    var promise1 = Promise<object>.Create();
+                    var promise1 = new Promise<object>();
 
                     var e = new Exception();
                     Action<object> thenHandler = _ => throw e;
@@ -472,7 +472,7 @@ namespace RSG.Tests.A__Spec
                 [Fact]
                 public void _when_promise1_is_rejected()
                 {
-                    var promise1 = Promise<object>.Create();
+                    var promise1 = new Promise<object>();
 
                     var e = new Exception();
                     var promise2 = 
@@ -498,7 +498,7 @@ namespace RSG.Tests.A__Spec
             [Fact]
             public void _If_onFulfilled_is_not_a_function_and_promise1_is_fulfilled_promise2_must_be_fulfilled_with_the_same_value_as_promise1()
             {
-                var promise1 = Promise<object>.Create();
+                var promise1 = new Promise<object>();
 
                 var promise2 = promise1.Catch(_ => 
                     throw new Exception("There shouldn't be an error")
@@ -521,7 +521,7 @@ namespace RSG.Tests.A__Spec
             [Fact]
             public void _If_onRejected_is_not_a_function_and_promise1_is_rejected_promise2_must_be_rejected_with_the_same_reason_as_promise1()
             {
-                var promise1 = Promise<object>.Create();
+                var promise1 = new Promise<object>();
 
                 var promise2 = promise1.Then(_ => 
                     throw new Exception("There shouldn't be a then callback")
