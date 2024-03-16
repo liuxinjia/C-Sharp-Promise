@@ -326,7 +326,7 @@ namespace RSG.Tests
 
             TestHelpers.VerifyDoesntThrowUnhandledException(() =>
             {
-                var all = Promise.All(EnumerableExt.FromItems<IPromise>(promise1, promise2));
+                var all = Promise.All(string.Empty, EnumerableExt.FromItems<IPromise>(promise1, promise2));
 
                 var completed = 0;
 
@@ -347,7 +347,7 @@ namespace RSG.Tests
 
             TestHelpers.VerifyDoesntThrowUnhandledException(() =>
             {
-                var all = Promise.All(EnumerableExt.FromItems<IPromise>(promise1, promise2));
+                var all = Promise.All(string.Empty, EnumerableExt.FromItems<IPromise>(promise1, promise2));
 
                 var errors = 0;
                 all.Catch(e => ++errors);
@@ -367,7 +367,7 @@ namespace RSG.Tests
 
             TestHelpers.VerifyDoesntThrowUnhandledException(() =>
             {
-                var all = Promise.All(EnumerableExt.FromItems<IPromise>(promise1, promise2));
+                var all = Promise.All(string.Empty, EnumerableExt.FromItems<IPromise>(promise1, promise2));
 
                 var errors = 0;
                 all.Catch(e => { ++errors; });
@@ -387,7 +387,7 @@ namespace RSG.Tests
 
             TestHelpers.VerifyDoesntThrowUnhandledException(() =>
             {
-                var all = Promise.All(EnumerableExt.FromItems<IPromise>(promise1, promise2));
+                var all = Promise.All(string.Empty, EnumerableExt.FromItems<IPromise>(promise1, promise2));
 
                 var errors = 0;
                 all.Catch(e => ++errors);
@@ -404,7 +404,7 @@ namespace RSG.Tests
         {
             TestHelpers.VerifyDoesntThrowUnhandledException(() =>
             {
-                var all = Promise.All(Enumerable.Empty<IPromise>());
+                var all = Promise.All(string.Empty, Enumerable.Empty<IPromise>());
 
                 var completed = 0;
 
@@ -422,7 +422,7 @@ namespace RSG.Tests
 
             TestHelpers.VerifyDoesntThrowUnhandledException(() =>
             {
-                var all = Promise.All(EnumerableExt.FromItems(promise1, promise2));
+                var all = Promise.All(string.Empty, EnumerableExt.FromItems(promise1, promise2));
 
                 var completed = 0;
 
@@ -442,7 +442,7 @@ namespace RSG.Tests
 
             var promiseA = Promise.Create();
             var promise = Promise
-                .All(promiseA, Promise.Rejected(exception))
+                .All(string.Empty,promiseA, Promise.Rejected(exception))
                 .Then(() => resolved = true)
                 .Catch(ex =>
                 {
@@ -577,7 +577,7 @@ namespace RSG.Tests
             TestHelpers.VerifyDoesntThrowUnhandledException(() =>
             {
                 Promise
-                    .Race(promise1, promise2)
+                    .Race(string.Empty, promise1, promise2)
                     .Then(() => ++completed);
 
                 promise1.Resolve();
@@ -597,7 +597,7 @@ namespace RSG.Tests
             TestHelpers.VerifyDoesntThrowUnhandledException(() =>
             {
                 Promise
-                    .Race(promise1, promise2)
+                    .Race(string.Empty, promise1, promise2)
                     .Then(() => ++completed);
 
                 promise2.Resolve();
@@ -617,7 +617,7 @@ namespace RSG.Tests
             TestHelpers.VerifyDoesntThrowUnhandledException(() =>
             {
                 Promise
-                    .Race(promise1, promise2)
+                    .Race(string.Empty,promise1, promise2)
                     .Catch(e => ex = e);
 
                 var expected = new Exception();
@@ -638,7 +638,7 @@ namespace RSG.Tests
             TestHelpers.VerifyDoesntThrowUnhandledException(() =>
             {
                 Promise
-                    .Race(promise1, promise2)
+                    .Race(string.Empty, promise1, promise2)
                     .Catch(e => ex = e);
 
                 var expected = new Exception();
@@ -654,7 +654,7 @@ namespace RSG.Tests
             var completed = 0;
 
             Promise
-                .Sequence()
+                .Sequence(string.Empty)
                 .Then(() => ++completed);
 
             Assert.Equal(1, completed);
@@ -666,7 +666,7 @@ namespace RSG.Tests
             var completed = 0;
 
             Promise
-                .Sequence(() => Promise.Create())
+                .Sequence(string.Empty,() => Promise.Create())
                 .Then(() => ++completed);
 
             Assert.Equal(0, completed);
@@ -678,7 +678,7 @@ namespace RSG.Tests
             var completed = 0;
 
             Promise
-                .Sequence(Promise.Resolved)
+                .Sequence(string.Empty, Promise.Resolved)
                 .Then(() => ++completed);
 
             Assert.Equal(1, completed);
@@ -690,7 +690,7 @@ namespace RSG.Tests
             var completed = 0;
 
             Promise
-                .Sequence(
+                .Sequence(string.Empty, 
                     Promise.Resolved,
                     () => Promise.Create()
                 )
@@ -705,7 +705,7 @@ namespace RSG.Tests
             var completed = 0;
 
             Promise
-                .Sequence(Promise.Resolved, Promise.Resolved)
+                .Sequence(string.Empty, Promise.Resolved, Promise.Resolved)
                 .Then(() => ++completed);
 
             Assert.Equal(1, completed);
@@ -717,7 +717,7 @@ namespace RSG.Tests
             var order = 0;
 
             Promise
-                .Sequence(
+                .Sequence(string.Empty,
                     () =>
                     {
                         Assert.Equal(1, ++order);
@@ -746,7 +746,7 @@ namespace RSG.Tests
             var ex = new Exception();
 
             Promise
-                .Sequence(() => throw ex)
+                .Sequence(string.Empty, () => throw ex)
                 .Then(() => ++completed)
                 .Catch(e =>
                 {
@@ -764,7 +764,7 @@ namespace RSG.Tests
             var completed = 0;
 
             Promise
-                .Sequence(
+                .Sequence(string.Empty,
                     () =>
                     {
                         ++completed;
@@ -833,7 +833,7 @@ namespace RSG.Tests
             Assert.Equal(1, completed);
         }
 
-#if !DEBUG
+#if DEBUG
         [Fact]
         public void unhandled_exception_is_propagated_via_event()
         {
@@ -867,7 +867,7 @@ namespace RSG.Tests
         }
 #endif
 
-#if !DEBUG
+#if DEBUG
         [Fact]
         public void exception_in_done_callback_is_propagated_via_event()
         {

@@ -154,7 +154,7 @@ namespace RSG.Tests
             int currentStep = 0;
             var expectedProgress = new[] { 0.25f, 0.50f, 0.75f, 1f };
 
-            Promise.All(promiseA, promiseB, promiseC, promiseD)
+            Promise.All(string.Empty, promiseA, promiseB, promiseC, promiseD)
                 .Progress(progress =>
                 {
                     Assert.InRange(currentStep, 0, expectedProgress.Length - 1);
@@ -178,7 +178,7 @@ namespace RSG.Tests
             var promiseB = Promise.Create();
             int reportCount = 0;
 
-            Promise.Race(promiseA, promiseB)
+            Promise.Race(string.Empty, promiseA, promiseB)
                 .Progress(progress =>
                 {
                     Assert.Equal(progress, 0.5f);
@@ -202,7 +202,7 @@ namespace RSG.Tests
             var promiseB = Promise.Resolved();
             int reportedCount = 0;
 
-            Promise.All(promiseA, promiseB)
+            Promise.All(string.Empty, promiseA, promiseB)
                 .Progress(progress =>
                 {
                     ++reportedCount;
@@ -225,7 +225,7 @@ namespace RSG.Tests
             var expectedProgress = new[] { 0.125f, 0.25f, 0.25f, 0.3125f, 0.375f, 0.4375f, 0.5f, 0.75f, 0.875f, 1f };
 
             Promise
-                .Sequence(() => promiseA, () => promiseB, () => promiseC, () => promiseD)
+                .Sequence(string.Empty, () => promiseA, () => promiseB, () => promiseC, () => promiseD)
                 .Progress(v =>
                 {
                     Assert.Equal(expectedProgress[currentReport], v);
