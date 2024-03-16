@@ -1,10 +1,9 @@
 using RSG.Promises;
 using System;
 using System.Linq;
-using RSG.Exceptions;
 using Xunit;
 
-namespace RSG.Tests
+namespace RSG.Promises.Tests
 {
     public class PromiseTests
     {
@@ -47,7 +46,7 @@ namespace RSG.Tests
 
             promise.Reject(new Exception());
 
-            Assert.Throws<PromiseStateException>(() =>
+            Assert.Throws<Exception>(() =>
                 promise.Reject(new Exception())
             );
         }
@@ -59,7 +58,7 @@ namespace RSG.Tests
 
             promise.Resolve(5);
 
-            Assert.Throws<PromiseStateException>(() =>
+            Assert.Throws<Exception>(() =>
                 promise.Reject(new Exception())
             );
         }
@@ -71,7 +70,7 @@ namespace RSG.Tests
 
             promise.Reject(new Exception());
 
-            Assert.Throws<PromiseStateException>(() => promise.Resolve(5));
+            Assert.Throws<Exception>(() => promise.Resolve(5));
         }
 
         [Fact]
@@ -100,7 +99,7 @@ namespace RSG.Tests
 
             promise.Resolve(5);
 
-            Assert.Throws<PromiseStateException>(() => promise.Resolve(5));
+            Assert.Throws<Exception>(() => promise.Resolve(5));
         }
 
         [Fact]

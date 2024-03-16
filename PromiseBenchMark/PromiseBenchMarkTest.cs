@@ -1,10 +1,6 @@
 using BenchmarkDotNet.Attributes;
-using RSG;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using RSG.Promises;
+
 
 namespace PromiseBenchMark
 {
@@ -42,6 +38,13 @@ namespace PromiseBenchMark
         {
             var promise = new Promise();
             promise.ReportProgress(1f);
+        }
+
+        [Benchmark]
+        public void ActionPromise()
+        {
+            var promise = new Promise();
+            promise.Then(() => { });
         }
         [Benchmark]
         public void ChainPromise()

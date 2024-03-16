@@ -1,7 +1,7 @@
 using System;
 using Xunit;
 
-namespace RSG.Tests
+namespace RSG.Promises.Tests
 {
     public class PromiseTimerTests
     {

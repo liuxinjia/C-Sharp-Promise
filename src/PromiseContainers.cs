@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace RSG
+namespace RSG.Promises
 {
     public class PromiseContainer
     {
@@ -101,21 +101,13 @@ namespace RSG
 
         public static void Clear(this IPromiseInfo promise)
         {
-            string name = promise.Name;
-            if (promise.Name == null)
-            {
-                name = string.Empty;
-            }
-            if (PromiseContainers.keyValuePairs.TryGetValue(name, out var promiseContainer))
-            {
-                promiseContainer.Clear();
-            }
+            
         }
 
         public static void ClearValue<T>(this IPromiseInfo promise)
         {
             promise.Clear();
-            string name = promise.Name;
+            string name = "";
             if (promise.Name == null)
             {
                 name = string.Empty;
@@ -128,7 +120,7 @@ namespace RSG
 
         private static PromiseContainer FindEntry(IPromiseInfo promise)
         {
-            string name = promise.Name;
+            string name = "";
             if (promise.Name == null)
             {
                 name = string.Empty;
@@ -144,7 +136,7 @@ namespace RSG
 
         private static PromiseValueContainer<T> FindEntry<T>(IPromiseInfo promise)
         {
-            string name = promise.Name;
+            string name = "";
             if (promise.Name == null)
             {
                 name = string.Empty;

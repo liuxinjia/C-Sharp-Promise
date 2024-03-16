@@ -1,8 +1,8 @@
 using System;
-using RSG.Exceptions;
+
 using Xunit;
 
-namespace RSG.Tests
+namespace RSG.Promises.Tests
 {
     public class PromiseProgressTests
     {
@@ -142,7 +142,7 @@ namespace RSG.Tests
             var promise = new Promise<int>();
             promise.Resolve(17);
 
-            Assert.Throws<PromiseStateException>(() => promise.ReportProgress(1f));
+            Assert.Throws<Exception>(() => promise.ReportProgress(1f));
         }
 
         [Fact]
@@ -151,7 +151,7 @@ namespace RSG.Tests
             var promise = new Promise<int>();
             promise.Reject(new Exception());
 
-            Assert.Throws<PromiseStateException>(() => promise.ReportProgress(1f));
+            Assert.Throws<Exception>(() => promise.ReportProgress(1f));
         }
 
         [Fact]
