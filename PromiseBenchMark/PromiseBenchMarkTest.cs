@@ -23,8 +23,6 @@ namespace PromiseBenchMark
         {
             var promise = new Promise();
             promise.Resolve();
-            promise.Clear();
-
         }
 
         [Benchmark]
@@ -33,6 +31,7 @@ namespace PromiseBenchMark
             var promise = new Promise();
             promise.Reject(new Exception());
         }
+
         [Benchmark]
         public void ProgressPromise()
         {
@@ -41,13 +40,52 @@ namespace PromiseBenchMark
         }
 
         [Benchmark]
-        public void ActionPromise()
+        public void ResolveActionPromise()
         {
             var promise = new Promise();
             promise.Then(() => { });
+            promise.Resolve();
         }
         [Benchmark]
-        public void ChainPromise()
+        public void ResolveActionValuePromise()
+        {
+            var promise = new Promise<int>();
+            promise.Then(_ => { });
+            promise.Resolve(2);
+        }
+
+        [Benchmark]
+        public void Convert_to_non_value_promise()
+        {
+            var promise = new Promise<int>();
+            var chainedPromise = new Promise();
+
+            const int promisedValue = 15;
+
+            promise
+                .Then(v => (IPromise)chainedPromise);
+
+            promise.Resolve(promisedValue);
+            chainedPromise.Resolve();
+        }
+
+        [Benchmark]
+        public void Convert_to_value_promise()
+        {
+            var chainedPromise = new Promise<int>();
+            var promise = new Promise();
+
+            const int promisedValue = 15;
+
+            promise
+                .Then(() => (IPromise)chainedPromise);
+
+            promise.Resolve();
+            chainedPromise.Resolve(promisedValue);
+        }
+
+        [Benchmark]
+        public void ChainPromises()
         {
             var promise = new Promise();
             var chainedPromise = new Promise();
@@ -62,19 +100,6 @@ namespace PromiseBenchMark
             chainedPromise.Resolve();
         }
 
-        [Benchmark]
-        public void can_chain_promise_and_convert_to_non_value_promise()
-        {
-            var promise = new Promise<int>();
-            var chainedPromise = new Promise();
 
-            const int promisedValue = 15;
-
-            promise
-                .Then(v => (IPromise)chainedPromise);
-
-            promise.Resolve(promisedValue);
-            chainedPromise.Resolve();
-        }
     }
 }

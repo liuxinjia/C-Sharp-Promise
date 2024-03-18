@@ -6,6 +6,13 @@ namespace RSG.Promises
 {
     public class Promise<PromisedT> : IPromise<PromisedT>
     {
+        #region Static Fields
+
+        private static readonly Queue<List<ResolveHandler<PromisedT>>> _resolveListPool = new Queue<List<ResolveHandler<PromisedT>>>();
+        private static readonly Queue<List<RejectHandler>> _rejectListPool = new Queue<List<RejectHandler>>();
+        private static readonly Queue<List<ProgressHandler>> _progressListPool = new Queue<List<ProgressHandler>>();
+        
+        #endregion
 
         #region Fields
         /// <summary>
@@ -29,10 +36,6 @@ namespace RSG.Promises
         /// </summary>
         protected PromisedT _resolveValue;
 
-        private Action<PromisedT> _resolveHandler;
-        private Action<Exception> _rejectHandler;
-        private Action<float> _progressHandler;
-
 
         private static readonly Promise<PromisedT> _resolvePromise = new Promise<PromisedT>();
         #endregion
@@ -46,40 +49,6 @@ namespace RSG.Promises
         public string Name { get; protected set; }
         public PromiseState CurState { get; protected set; }
 
-
-        public Action<PromisedT> ResolveHandler
-        {
-            get
-            {
-                if (_resolveHandler == null)
-                {
-                    _resolveHandler = Resolve;
-                }
-                return _resolveHandler;
-            }
-        }
-        public Action<Exception> RejectHandler
-        {
-            get
-            {
-                if (_rejectHandler == null)
-                {
-                    _rejectHandler = RejectWithoutDebug;
-                }
-                return _rejectHandler;
-            }
-        }
-        public Action<float> ProgressHandler
-        {
-            get
-            {
-                if (_progressHandler == null)
-                {
-                    _progressHandler = ReportProgress;
-                }
-                return _progressHandler;
-            }
-        }
         #endregion
 
         public Promise()
@@ -98,7 +67,7 @@ namespace RSG.Promises
         {
             try
             {
-                resolver(ResolveHandler, RejectHandler);
+                resolver(Resolve, RejectWithoutDebug);
             }
             catch (Exception ex)
             {
@@ -220,8 +189,8 @@ namespace RSG.Promises
                 }
             }
 
-            ActionHandlers(resultPromise, resultPromise.ResolveHandler, RejectHandler);
-            ProgressHandlers(resultPromise, resultPromise.ProgressHandler);
+            ActionHandlers(resultPromise, resultPromise.Resolve, RejectHandler);
+            ProgressHandlers(resultPromise, resultPromise.ReportProgress);
 
             return resultPromise;
         }
@@ -280,7 +249,7 @@ namespace RSG.Promises
             }
             else
             {
-                rejectHandler = resultPromise.RejectHandler;
+                rejectHandler = resultPromise.Reject;
             }
 
             ActionHandlers(resultPromise, resolveHandler, rejectHandler);
@@ -327,7 +296,7 @@ namespace RSG.Promises
                 {
                     onResolved(v)
                         .Progress(progress => resultPromise.ReportProgress(progress))
-                        .Then(resultPromise.ResolveHandler, resultPromise.RejectHandler);
+                        .Then(resultPromise.Resolve, resultPromise.Reject);
                 };
             }
             else
@@ -347,7 +316,7 @@ namespace RSG.Promises
             }
             else
             {
-                rejectHandler = resultPromise.RejectHandler;
+                rejectHandler = resultPromise.Reject;
             }
 
             ActionHandlers(resultPromise, resolveHandler, rejectHandler);
@@ -405,10 +374,10 @@ namespace RSG.Promises
             void ResolveHandler(PromisedT v)
             {
                 onResolved(v)
-                    .Progress(resultPromise.ProgressHandler)
+                    .Progress(resultPromise.ReportProgress)
                     .Then(
                         // Should not be necessary to specify the arg type on the next line, but Unity (mono) has an internal compiler error otherwise.
-                        resultPromise.ResolveHandler, resultPromise.RejectHandler);
+                        resultPromise.Resolve, resultPromise.Reject);
             }
 
             Action<Exception> rejectHandler;
@@ -420,8 +389,8 @@ namespace RSG.Promises
                     {
                         onRejected(ex)
                             .Then(
-                                resultPromise.ResolveHandler,
-                                resultPromise.RejectHandler
+                                resultPromise.Resolve,
+                                resultPromise.Reject
                             );
                     }
                     catch (Exception callbackEx)
@@ -432,7 +401,7 @@ namespace RSG.Promises
             }
             else
             {
-                rejectHandler = resultPromise.RejectHandler;
+                rejectHandler = resultPromise.Reject;
             }
 
             ActionHandlers(resultPromise, ResolveHandler, rejectHandler);
@@ -503,7 +472,7 @@ namespace RSG.Promises
             var promise = GetRawPromise<PromisedT>();
             promise.WithName(Name);
 
-            Then(promise.ResolveHandler);
+            Then(promise.Resolve);
             Catch(e =>
             {
                 // Something different from continue with
@@ -669,7 +638,14 @@ namespace RSG.Promises
         {
             if (_rejectHandlers == null)
             {
-                _rejectHandlers = new List<RejectHandler>();
+                if (_rejectListPool.Count == 0)
+                {
+                    _rejectHandlers = new List<RejectHandler>();
+                }
+                else
+                {
+                    _rejectHandlers = _rejectListPool.Dequeue();
+                }
             }
             _rejectHandlers.Add(new RejectHandler
             {
@@ -682,7 +658,14 @@ namespace RSG.Promises
         {
             if (_resolveHandlers == null)
             {
-                _resolveHandlers = new List<ResolveHandler<PromisedT>>();
+                if (_resolveListPool.Count == 0)
+                {
+                    _resolveHandlers = new List<ResolveHandler<PromisedT>>();
+                }
+                else
+                {
+                    _resolveHandlers = _resolveListPool.Dequeue();
+                }
             }
             _resolveHandlers.Add(new ResolveHandler<PromisedT>
             {
@@ -695,7 +678,14 @@ namespace RSG.Promises
         {
             if (_progressHandlers == null)
             {
-                _progressHandlers = new List<ProgressHandler>();
+                if (_progressListPool.Count == 0)
+                {
+                    _progressHandlers = new List<ProgressHandler>();
+                }
+                else
+                {
+                    _progressHandlers = _progressListPool.Dequeue();
+                }
             }
             _progressHandlers.Add(new ProgressHandler
             {
@@ -752,6 +742,19 @@ namespace RSG.Promises
             _rejectHandlers?.Clear();
             _resolveHandlers?.Clear();
             _progressHandlers?.Clear();
+
+            if (_resolveHandlers != null)
+            {
+                _resolveListPool.Enqueue(_resolveHandlers);
+            }
+            if (_rejectHandlers != null)
+            {
+                _rejectListPool.Enqueue(_rejectHandlers);
+            }
+            if (_progressHandlers != null)
+            {
+                _progressListPool.Enqueue(_progressHandlers);
+            }
         }
 
         protected void InvokeHandler<T>(Action<T> callback, IRejectable rejectable, T value)
@@ -1091,19 +1094,19 @@ namespace RSG.Promises
                                 float sliceLength = 1f / count;
                                 promise.ReportProgress(sliceLength * (v + itemSequence));
                             })
-                            .Then(newPromise.ResolveHandler,
+                            .Then(newPromise.Resolve,
                                 _ =>
                                 {
                                     float sliceLength = 1f / count;
                                     promise.ReportProgress(sliceLength * itemSequence);
 
                                     fn()
-                                        .Then(newPromise.ResolveHandler)
-                                        .Catch(newPromise.RejectHandler);
+                                        .Then(newPromise.Resolve)
+                                        .Catch(newPromise.RejectWithoutDebug);
                                 });
                         return newPromise;
                     })
-                .Then(promise.ResolveHandler)
+                .Then(promise.Resolve)
                 .Catch(ex =>
                 {
                     promise.ReportProgress(1f);
