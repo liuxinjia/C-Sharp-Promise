@@ -163,7 +163,18 @@ namespace RSG.Promises
             {
                 return this;
             }
-
+            if (CurState == PromiseState.Resolved)
+            {
+                try
+                {
+                    onRejected(_rejectionException);
+                    return Promise.Resolved();
+                }
+                catch (Exception cbEx)
+                {
+                    Promise.Rejected(cbEx);
+                }
+            }
             var resultPromise = GetRawPromise();
             resultPromise.WithName(Name);
 
@@ -209,6 +220,25 @@ namespace RSG.Promises
                 catch (Exception ex)
                 {
                     return Rejected(ex);
+                }
+            }
+            if (CurState == PromiseState.Rejected)
+            {
+                try
+                {
+                    if (onRejected != null)
+                    {
+                        onRejected(_rejectionException);
+                        return Promise.Resolved();
+                    }
+                    else
+                    {
+                        return Promise.Rejected(_rejectionException);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    return Promise.Rejected(ex);
                 }
             }
 
@@ -278,7 +308,25 @@ namespace RSG.Promises
                     return Rejected(ex);
                 }
             }
-
+            if (CurState == PromiseState.Rejected)
+            {
+                try
+                {
+                    if (onRejected != null)
+                    {
+                        onRejected(_rejectionException);
+                        return Promise.Resolved();
+                    }
+                    else
+                    {
+                        return Promise.Rejected(_rejectionException);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    return Promise.Rejected(ex);
+                }
+            }
             var resultPromise = GetRawPromise();
             resultPromise.WithName(Name);
 
@@ -354,7 +402,24 @@ namespace RSG.Promises
                     }
                 }
             }
-
+            if (CurState == PromiseState.Rejected)
+            {
+                try
+                {
+                    if (onRejected != null)
+                    {
+                        return onRejected.Invoke(_rejectionException);
+                    }
+                    else
+                    {
+                        return Promise<ConvertedT>.Rejected(_rejectionException);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    return Promise<ConvertedT>.Rejected(ex);
+                }
+            }
             var resultPromise = GetRawPromise<ConvertedT>();
             resultPromise.WithName(Name);
 

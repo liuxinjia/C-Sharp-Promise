@@ -11,7 +11,7 @@ namespace RSG.Promises
         private static readonly Queue<List<ResolveHandler<PromisedT>>> _resolveListPool = new Queue<List<ResolveHandler<PromisedT>>>();
         private static readonly Queue<List<RejectHandler>> _rejectListPool = new Queue<List<RejectHandler>>();
         private static readonly Queue<List<ProgressHandler>> _progressListPool = new Queue<List<ProgressHandler>>();
-        
+
         #endregion
 
         #region Fields
@@ -133,13 +133,23 @@ namespace RSG.Promises
 
         public IPromise Catch(Action<Exception> onRejected)
         {
-            
 
             if (CurState == PromiseState.Resolved)
             {
                 return Promise.Resolved();
             }
-
+            if (CurState == PromiseState.Rejected)
+            {
+                try
+                {
+                    onRejected(_rejectionException);
+                    return Promise.Resolved();
+                }
+                catch (Exception cbEx)
+                {
+                    return Promise.Rejected(cbEx);
+                }
+            }
             var resultPromise = GetRawPromise();
             resultPromise.WithName(Name);
 
@@ -171,6 +181,17 @@ namespace RSG.Promises
             if (CurState == PromiseState.Resolved)
             {
                 return this;
+            }
+            if (CurState == PromiseState.Rejected)
+            {
+                try
+                {
+                    return Promise<PromisedT>.Resolved(onRejected(_rejectionException));
+                }
+                catch (Exception cbEx)
+                {
+                    return Promise<PromisedT>.Rejected(cbEx);
+                }
             }
 
             var resultPromise = GetRawPromise<PromisedT>();
@@ -213,6 +234,25 @@ namespace RSG.Promises
                 {
                     onResolved(_resolveValue);
                     return Promise.Resolved();
+                }
+                catch (Exception ex)
+                {
+                    return Promise.Rejected(ex);
+                }
+            }
+            if (CurState == PromiseState.Rejected)
+            {
+                try
+                {
+                    if (onRejected != null)
+                    {
+                        onRejected(_rejectionException);
+                        return Promise.Resolved();
+                    }
+                    else
+                    {
+                        return Promise.Rejected(_rejectionException);
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -285,7 +325,25 @@ namespace RSG.Promises
                     return Promise.Rejected(ex);
                 }
             }
-
+            if (CurState == PromiseState.Rejected)
+            {
+                try
+                {
+                    if (onRejected != null)
+                    {
+                        onRejected(_rejectionException);
+                        return Promise.Resolved();
+                    }
+                    else
+                    {
+                        return Promise.Rejected(_rejectionException);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    return Promise.Rejected(ex);
+                }
+            }
             var resultPromise = GetRawPromise();
             resultPromise.WithName(Name);
 
@@ -348,7 +406,24 @@ namespace RSG.Promises
             Action<float> onProgress
         )
         {
-
+            if (CurState == PromiseState.Rejected)
+            {
+                try
+                {
+                    if (onRejected != null)
+                    {
+                        return onRejected.Invoke(_rejectionException);
+                    }
+                    else
+                    {
+                        return Promise<ConvertedT>.Rejected(_rejectionException);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    return Promise<ConvertedT>.Rejected(ex);
+                }
+            }
             if (CurState == PromiseState.Resolved)
             {
                 try
@@ -454,7 +529,7 @@ namespace RSG.Promises
         }
         public IPromise<PromisedT> Finally(Action onComplete)
         {
-            
+
 
             if (CurState == PromiseState.Resolved)
             {
@@ -498,7 +573,7 @@ namespace RSG.Promises
         public IPromise ContinueWith(Func<IPromise> onComplete)
         {
             var promise = GetRawPromise();
-            promise.WithName(  Name);
+            promise.WithName(Name);
 
             Then(_ => promise.Resolve());
             Catch(_ => promise.Resolve());
@@ -569,12 +644,12 @@ namespace RSG.Promises
         public void Reject(Exception ex)
         {
             RejectWithoutDebug(ex);
-            
+
         }
 
         public void RejectWithoutDebug(Exception ex)
         {
-            
+
             if (CurState != PromiseState.Pending)
             {
                 throw new Exception(PromiseExceptionType.Valid_REJECTED_STATE.ToString());
@@ -769,6 +844,7 @@ namespace RSG.Promises
                 rejectable.Reject(ex);
             }
         }
+
         #endregion
 
         #region Extension Method
@@ -776,7 +852,7 @@ namespace RSG.Promises
         // Convert an exception directly into a rejected promise.
         public static IPromise<PromisedT> Rejected(Exception ex)
         {
-            
+
             return _resolvePromise.Rejected<PromisedT>(ex);
         }
 
@@ -861,7 +937,7 @@ namespace RSG.Promises
         // Convert an exception directly into a rejected promise.
         private IPromise<ConvertedT> Rejected<ConvertedT>(Exception ex)
         {
-            
+
 
             var promise = GetRawPromise<ConvertedT>();
             promise._rejectionException = ex;
@@ -1116,6 +1192,7 @@ namespace RSG.Promises
             return promise;
         }
         #endregion
+
         #endregion
     }
 
