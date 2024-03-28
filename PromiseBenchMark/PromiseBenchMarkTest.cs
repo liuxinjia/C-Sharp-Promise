@@ -46,13 +46,7 @@ namespace PromiseBenchMark
             promise.Then(() => { });
             promise.Resolve();
         }
-        [Benchmark]
-        public void ResolveActionValuePromise()
-        {
-            var promise = new Promise<int>();
-            promise.Then(_ => { });
-            promise.Resolve(2);
-        }
+       
 
         [Benchmark]
         public void Convert_to_non_value_promise()

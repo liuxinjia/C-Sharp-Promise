@@ -1,3 +1,4 @@
+using RSG;
 using System;
 using System.Collections.Generic;
 
@@ -7,7 +8,7 @@ namespace RSG.Promises
     /// Represents a C# promise.
     /// See: https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Promise
     /// </summary>
-    public interface IPromise<PromisedT> : IPendingPromise<PromisedT>, IBasePromise
+    public interface IPromise<PromisedT> : IPendingPromise<PromisedT>, IPromiseTaskSource<PromisedT>, IBasePromise
     {
 
         /// <summary>
@@ -177,7 +178,7 @@ namespace RSG.Promises
         /// The state of the returning promise will be based on the new non-value promise, not the preceding (rejected or resolved) promise.
         /// </summary>
         IPromise ContinueWith(Action onComplete);
-        
+
         /// <summary>
         /// Adds a callback that chains a value promise (optionally converting to a different value type).
         /// ContinueWith callbacks will always be called, even if any preceding promise is rejected or encounters an error.
@@ -190,5 +191,7 @@ namespace RSG.Promises
         /// Progress callbacks will be called whenever the promise owner reports progress towards the resolution of the promise.
         /// </summary>
         IPromise<PromisedT> Progress(Action<float> onProgress);
+
+        PromiseTask<PromisedT> AsTask();
     }
 }

@@ -8,8 +8,8 @@ namespace RSG.Promises
     {
         #region Static Fields
         private static Queue<List<ResolveHandler>> _resolveListPool = new Queue<List<ResolveHandler>>();
-        private static Queue<List<RejectHandler>> _rejectListPool = new Queue<List<RejectHandler>>();
-        private static Queue<List<ProgressHandler>> _progressListPool = new Queue<List<ProgressHandler>>();
+        internal static Queue<List<RejectHandler>> _rejectListPool = new Queue<List<RejectHandler>>();
+        internal static Queue<List<ProgressHandler>> _progressListPool = new Queue<List<ProgressHandler>>();
         /// <summary>
         ///     Set to true to enable tracking of promises.
         /// </summary>
@@ -158,12 +158,11 @@ namespace RSG.Promises
         public IPromise Catch(Action<Exception> onRejected)
         {
 
-
             if (CurState == PromiseState.Resolved)
             {
                 return this;
             }
-            if (CurState == PromiseState.Resolved)
+            if (CurState == PromiseState.Rejected)
             {
                 try
                 {
@@ -559,6 +558,7 @@ namespace RSG.Promises
         #endregion
 
         #region IPendingPromise
+
         public void Resolve()
         {
             if (CurState != PromiseState.Pending)
@@ -773,6 +773,10 @@ namespace RSG.Promises
             {
                 _progressListPool.Enqueue(_progressHandlers);
             }
+
+            _rejectHandlers = null;
+            _resolveHandlers = null;
+            _resolveHandlers = null;
         }
 
         private void InvokeResolveHandler(Action callback, IRejectable rejectable)
