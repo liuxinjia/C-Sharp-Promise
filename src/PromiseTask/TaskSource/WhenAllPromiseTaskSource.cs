@@ -4,6 +4,112 @@ using System.Threading;
 
 namespace RSG
 {
+    public sealed class WhenAllPromiseTaskSource : IPromiseTaskSource
+    {
+        private int completeCount;
+        private int tasksLength;
+        private PromiseTaskCompletionSourceCore core;
+
+        public WhenAllPromiseTaskSource(PromiseTask[] tasks, int tasksLength)
+        {
+            completeCount = 0;
+            this.tasksLength  = tasksLength;
+
+            if (tasksLength == 0)
+            {
+                core.TrySetResult();
+                return;
+            }
+
+            for (int i = 0; i < tasksLength; i++)
+            {
+                PromiseTaskAwaiter awaiter;
+                try
+                {
+                    awaiter = tasks[i].GetAwaiter();
+                }
+                catch (Exception ex)
+                {
+                    core.TrySetException(ex);
+                    continue;
+                }
+
+                if (awaiter.IsCompleted)
+                {
+                    TryInvokeContinuation(this, awaiter, i);
+                }
+                else
+                {
+                    int index = i;
+                    awaiter.SourceOnCompleted(() =>
+                    {
+                        TryInvokeContinuation(this, awaiter, index);
+                    });
+                }
+            }
+        }
+
+        static void TryInvokeContinuation(WhenAllPromiseTaskSource self, in PromiseTaskAwaiter awaiter, int i)
+        {
+            try
+            {
+                 awaiter.GetResult();
+            }
+            catch (Exception ex)
+            {
+                self.core.TrySetException(ex);
+                return;
+            }
+
+            if (Interlocked.Increment(ref self.completeCount) == self.tasksLength)
+            {
+                self.core.TrySetResult();
+            }
+        }
+
+        public void GetResult(short token)
+        {
+            // when the operation will fail-fast regardless of the order of rejection of the promises, and the error will always occur within the configured promise chain, enabling it to be caught in the normal way
+
+            try
+            {
+                core.GetResult(token);
+            }
+            catch (Exception ex)
+            {
+                //throw ex;
+            }
+
+        }
+
+        public PromiseTaskStatus GetStatus(short token)
+        {
+            return core.GetStatus(token);
+        }
+
+        public void OnCompleted(Action continuation, short token)
+        {
+            core.OnCompleted(continuation, token);
+        }
+
+        public PromiseTaskStatus UnsafeGetStatus()
+        {
+            return core.UnsafeGetStatus();
+        }
+
+        void IPromiseTaskSource.GetResult(short token)
+        {
+            try
+            {
+                core.GetResult(token);
+            }
+            catch (Exception ex)
+            {
+                //throw ex;
+            }
+        }
+    }
+
     public sealed class WhenAllPromiseTaskSource<T> : IPromiseTaskSource<T[]>
     {
         private T[] result;

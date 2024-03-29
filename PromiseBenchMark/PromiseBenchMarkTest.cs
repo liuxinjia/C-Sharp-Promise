@@ -5,12 +5,9 @@ using RSG.Promises;
 namespace PromiseBenchMark
 {
     [MemoryDiagnoser]
+    [Config(typeof(BenchMarkConfig))]
     public class PromiseBenchMarkTest
     {
-        [GlobalSetup]
-        public void SetUp()
-        {
-        }
 
         [Benchmark]
         public void CreatePromise()
@@ -46,7 +43,7 @@ namespace PromiseBenchMark
             promise.Then(() => { });
             promise.Resolve();
         }
-       
+
 
         [Benchmark]
         public void Convert_to_non_value_promise()

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using RSG;
 
 namespace RSG.CompilerServices
@@ -6,7 +6,10 @@ namespace RSG.CompilerServices
     internal interface IStateMachineRunnerPromise
     {
         Action MoveNext { get; }
-        void Return();
+        PromiseTask Task { get; }
+
+        void SetResult();
+        void SetException(Exception exception);
     }
 
     internal interface IStateMachineRunnerPromise<T>

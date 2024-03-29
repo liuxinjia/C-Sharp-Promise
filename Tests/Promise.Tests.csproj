@@ -51,6 +51,7 @@
   <ItemGroup>
     <Compile Include="A+ Spec\2.2.cs" />
     <Compile Include="PromiseProgressTests.cs" />
+    <Compile Include="PromiseTaskNoGenericTests.cs" />
     <Compile Include="PromiseTaskTests.cs" />
     <Compile Include="Promise_NonGeneric_ProgressTests.cs" />
     <Compile Include="PromiseTests.cs" />

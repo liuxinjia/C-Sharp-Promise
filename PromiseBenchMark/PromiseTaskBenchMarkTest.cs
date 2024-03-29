@@ -1,40 +1,35 @@
 using BenchmarkDotNet.Attributes;
 using RSG.Promises;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PromiseBenchMark
 {
     [MemoryDiagnoser]
+    [Config(typeof(BenchMarkConfig))]
     public class PromiseTaskBenchMarkTest
     {
         [Benchmark]
         public async Task ResolveAsyncPromise()
         {
-            var promise = Promise<int>.Create();
-            await promise.ResolveAsync(2);
+            var promise = Promise.Create();
+            await promise.ResolveAsync();
         }
 
         [Benchmark]
         public async Task ResolvePromiseWithTask()
         {
-            var promise = new Promise<int>();
+            var promise = new Promise();
             await Task.Delay(1);
-            await promise.ResolveAsync(2);
+            await promise.ResolveAsync();
         }
 
         [Benchmark]
         public async Task ChainPromisesAsync()
         {
-            var promise = Promise<int>.Create();
-            var chainedPromise = Promise<int>.Create();
-            var result = 0;
+            var promise = Promise.Create();
+            var chainedPromise = Promise.Create();
 
-            result = await promise.ResolveAsync(result);
-            result = await chainedPromise.ResolveAsync(result);
+            await promise.ResolveAsync();
+            await chainedPromise.ResolveAsync();
         }
 
     }

@@ -1,17 +1,14 @@
 using System;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
-using RSG;
 
 namespace RSG.CompilerServices
 {
-    public struct PromiseTaskMethodBuilder<T>
+    public struct PromiseTaskMethodBuilder
     {
-        private IStateMachineRunnerPromise<T> runnerPromise;
-        private T result;
+        private IStateMachineRunnerPromise runnerPromise;
         private Exception ex;
 
-        public PromiseTask<T> Task
+        public PromiseTask Task
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get
@@ -20,9 +17,9 @@ namespace RSG.CompilerServices
                 {
                     if (ex != null)
                     {
-                        return PromiseTask<T>.FromException(ex);
+                        return PromiseTask.FromException(ex);
                     }
-                    return PromiseTask<T>.FromResult(result);
+                    return PromiseTask.CompletedTask;
                 }
                 else
                 {
@@ -33,8 +30,8 @@ namespace RSG.CompilerServices
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 
-        public static PromiseTaskMethodBuilder<T> Create()
-            => new PromiseTaskMethodBuilder<T>();
+        public static PromiseTaskMethodBuilder Create()
+            => new PromiseTaskMethodBuilder();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 
@@ -45,15 +42,11 @@ namespace RSG.CompilerServices
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void SetResult(T result)
+        public void SetResult()
         {
             if (runnerPromise != null)
             {
-                runnerPromise.SetResult(result);
-            }
-            else
-            {
-                this.result = result;
+                runnerPromise.SetResult();
             }
         }
 
@@ -73,7 +66,7 @@ namespace RSG.CompilerServices
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void AwaitOnCompleted<TAwaiter, TStateMachine>(ref TAwaiter awaiter, ref TStateMachine stateMachine) where TAwaiter : INotifyCompletion where TStateMachine : IAsyncStateMachine
         {
-            AsyncMethodBuilderCore<TStateMachine, T>.SetStateMachine(ref stateMachine, ref runnerPromise);
+            AsyncMethodBuilderCore<TStateMachine>.SetStateMachine(ref stateMachine, ref runnerPromise);
             awaiter.OnCompleted(runnerPromise.MoveNext);
         }
 
@@ -88,7 +81,7 @@ namespace RSG.CompilerServices
         public void AwaitUnsafeOnCompleted<TAwaiter, TStateMachine>(ref TAwaiter awaiter, ref TStateMachine stateMachine) where TAwaiter : ICriticalNotifyCompletion where TStateMachine : IAsyncStateMachine
         {
             // aovid boxed operation (interface to struct)
-            AsyncMethodBuilderCore<TStateMachine, T>.SetStateMachine(ref stateMachine, ref runnerPromise);
+            AsyncMethodBuilderCore<TStateMachine>.SetStateMachine(ref stateMachine, ref runnerPromise);
             awaiter.UnsafeOnCompleted(runnerPromise.MoveNext);
         }
 

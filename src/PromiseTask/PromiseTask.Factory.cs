@@ -4,25 +4,8 @@ using System.Linq;
 
 namespace RSG
 {
-    public static class PromiseTaskExtension
-    {
-        public static PromiseTask<T> ToPromiseTask<T>(this T a)
-        {
-            return PromiseTask<T>.FromResult(a);
-        }
-
-        public static PromiseTask<T> ToPromiseTask<T>(this Exception a)
-        {
-            return PromiseTask<T>.FromException(a);
-        }
-    }
     public partial struct PromiseTask<T>
     {
-        //private static readonly PromiseTask CanceledUniTask = new Func<UniTask>(() =>
-        //{
-        //    return new UniTask(new CanceledResultSource(CancellationToken.None), 0);
-        //})();
-
         public static PromiseTask<T> FromException(Exception ex)
         {
             // PLAN: Handle Cancele
@@ -51,4 +34,24 @@ namespace RSG
         }
     }
 
+    public partial struct PromiseTask
+    {
+        public static PromiseTask FromException(Exception ex)
+        {
+            return new PromiseTask(new ExceptionResultSource(ex), 0);
+        }
+
+        public static PromiseTask WhenAll(params PromiseTask[] tasks)
+        {
+            return WhenAll((IEnumerable<PromiseTask>)tasks.ToArray());
+        }
+
+
+        public static PromiseTask WhenAll(IEnumerable<PromiseTask> tasks)
+        {
+            PromiseTask[] promiseTasks = tasks.ToArray();
+            var promise = new WhenAllPromiseTaskSource(promiseTasks, promiseTasks.Length); // consumed array in constructor.
+            return new PromiseTask(promise, 0);
+        }
+    }
 }

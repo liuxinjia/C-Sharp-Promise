@@ -1,4 +1,4 @@
-namespace RSG.Promises
+namespace RSG.Promise.Utils
 {
     /// <summary>
     /// Provides static methods for creating tuple objects.

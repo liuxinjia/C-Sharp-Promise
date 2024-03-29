@@ -1,4 +1,6 @@
-namespace RSG.Promises
+using RSG.Promises;
+
+namespace RSG.Promise.Utils
 {
     public static class PromiseHelpers
     {
@@ -15,7 +17,7 @@ namespace RSG.Promises
             var promise = new Promise<Tuple<T1, T2>>();
 
             p1
-                .Then(val => 
+                .Then(val =>
                 {
                     val1 = val;
                     numUnresolved--;
@@ -36,7 +38,7 @@ namespace RSG.Promises
                 .Done();
 
             p2
-                .Then(val => 
+                .Then(val =>
                 {
                     val2 = val;
                     numUnresolved--;

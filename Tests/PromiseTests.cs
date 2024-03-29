@@ -1,3 +1,4 @@
+using RSG.Promise.Utils;
 using RSG.Promises;
 using System;
 using System.Linq;

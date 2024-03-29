@@ -15,7 +15,6 @@ namespace RSG.Promises.Tests
 {
     public class PromiseTaskTests
     {
-
         [Fact]
         public async Task<int> ResolvePromise()
         {
@@ -40,7 +39,7 @@ namespace RSG.Promises.Tests
         {
             async PromiseTask<int> ResolveInternal()
             {
-                return await 2.ToPromiseTask();
+                return await PromiseTask<int>.FromResult(2);
             }
 
             var result = await ResolveInternal();
@@ -91,7 +90,7 @@ namespace RSG.Promises.Tests
 
             async PromiseTask<int> ResolveInternal()
             {
-                return await new Exception(Message).ToPromiseTask<int>();
+                return await PromiseTask<int>.FromException(new Exception(Message));
             }
 
             string resultEx = null;
@@ -109,33 +108,7 @@ namespace RSG.Promises.Tests
         }
 
         [Fact]
-        public async Task ChainValue()
-        {
-            var promise = Promise<int>.Create();
-            var chainedPromise = Promise<int>.Create();
-            var result = 1;
-
-            async PromiseTask<int> ResolveInternal(int v)
-            {
-                v++;
-                await promise.ResolveAsync(v);
-                return v;
-            }
-
-            async PromiseTask<int> ChildResolveInternal(int v)
-            {
-                v *= 10;
-                await promise.ResolveAsync(v);
-                return v;
-            }
-
-            result = await ResolveInternal(result);
-            result = await ChildResolveInternal(result);
-
-            Assert.Equal(20, result);
-        }
-        [Fact]
-        public async Task ChainPromise_Then()
+        public async Task ChainPromise()
         {
             var promise = Promise<int>.Create();
             var completed = 0;

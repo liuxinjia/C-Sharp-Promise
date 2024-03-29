@@ -1,18 +1,20 @@
+using RSG.Promise;
+using RSG.Promise.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace RSG.Promises
 {
-    public class Promise : IPromise
+    public class Promise : IPromise, IPromiseTaskSource, IPoolNode<Promise>
     {
         #region Static Fields
-        private static Queue<List<ResolveHandler>> _resolveListPool = new Queue<List<ResolveHandler>>();
-        internal static Queue<List<RejectHandler>> _rejectListPool = new Queue<List<RejectHandler>>();
-        internal static Queue<List<ProgressHandler>> _progressListPool = new Queue<List<ProgressHandler>>();
-        /// <summary>
-        ///     Set to true to enable tracking of promises.
-        /// </summary>
+        private static Pool<ListPoolNode<ResolveHandler>> _resolveListPool;
+        internal static Pool<ListPoolNode<RejectHandler>> _rejectListPool;
+        internal static Pool<ListPoolNode<ProgressHandler>> _progressListPool;
+        private static Pool<Promise> _taskPool;/// <summary>
+                                               ///     Set to true to enable tracking of promises.
+                                               /// </summary>
         public static bool EnablePromiseTracking = false;
 
         private static EventHandler<ExceptionEventArgs> _unhandledException;
@@ -37,16 +39,6 @@ namespace RSG.Promises
         internal static readonly HashSet<IPromiseInfo> PendingPromises =
             new HashSet<IPromiseInfo>();
 
-        // for unit-test
-        public static int GetPendingPromiseCount()
-        {
-            return PendingPromises.Count;
-        }
-
-        public static void ClearPending()
-        {
-            PendingPromises.Clear();
-        }
         /// <summary>
         ///     Convert a simple value directly into a resolved promise.
         /// </summary>
@@ -62,24 +54,25 @@ namespace RSG.Promises
         /// <summary>
         ///     Error handlers.
         /// </summary>
-        protected List<RejectHandler> _rejectHandlers;
+        protected ListPoolNode<RejectHandler> _rejectHandlers;
         /// <summary>
         ///     Completed handlers that accept no value.
         /// </summary>
-        protected List<ResolveHandler> _resolveHandlers;
+        protected ListPoolNode<ResolveHandler> _resolveHandlers;
         /// <summary>
         ///     Progress handlers.
         /// </summary>
-        protected List<ProgressHandler> _progressHandlers;
-
-
-
+        protected ListPoolNode<ProgressHandler> _progressHandlers;
+        private Action _rejesterAction;
+        private Promise _nextNode;
         #endregion
 
         #region Properties
         public int Id { get; }
         public string Name { get; protected set; }
         public PromiseState CurState { get; protected set; }
+        public ref Promise NextNode => ref _nextNode;
+        public bool IsRecycled { get; set; }
         #endregion
 
 
@@ -113,6 +106,15 @@ namespace RSG.Promises
             Id = NextId();
         }
 
+        public static Promise Create()
+        {
+            if (!_taskPool.TryPop(out var result))
+            {
+                result = new Promise();
+            }
+            return result;
+        }
+
         #region IPromiseInfo Implementation
         public IPromise WithName(string name)
         {
@@ -125,6 +127,9 @@ namespace RSG.Promises
             ClearHandlers();
             Name = string.Empty;
             CurState = PromiseState.Pending;
+            _rejesterAction = null;
+
+            _taskPool.TryPush(this);
         }
 
         internal static int NextId()
@@ -559,6 +564,12 @@ namespace RSG.Promises
 
         #region IPendingPromise
 
+        public async PromiseTask ResolveAsync()
+        {
+            Resolve();
+            await AsTask();
+        }
+
         public void Resolve()
         {
             if (CurState != PromiseState.Pending)
@@ -624,6 +635,71 @@ namespace RSG.Promises
         }
         #endregion
 
+        #region  ITaskSource
+        public void GetResult(short token)
+        {
+            if (_rejectionException != null)
+            {
+                // PLAN handle cancel
+                var tmpEx = _rejectionException;
+                Dispose();
+                throw tmpEx;
+            }
+
+            Dispose();
+        }
+
+        public PromiseTaskStatus GetStatus(short token)
+        {
+            return CurState.ToTaskStatus();
+        }
+
+        void IPromiseTaskSource.GetResult(short token)
+        {
+            if (_rejectionException != null)
+            {
+                // PLAN handle cancel
+                var tmpEx = _rejectionException;
+                Dispose();
+
+                throw tmpEx;
+            }
+            Dispose();
+
+        }
+
+        public PromiseTaskStatus UnsafeGetStatus()
+        {
+            return CurState.ToTaskStatus();
+        }
+
+        public void OnCompleted(Action continuation, short token)
+        {
+            _rejesterAction = continuation;
+        }
+
+        public async PromiseTask AsTask()
+        {
+            switch (CurState)
+            {
+                case PromiseState.Pending:
+                    await new PromiseTask(this, 100);
+                    break;
+                case PromiseState.Rejected:
+                default:
+                    var tmpEx = _rejectionException;
+                    Dispose();
+                    //throw new Exception(string.Empty, tmpEx);
+                    throw tmpEx;
+                case PromiseState.Resolved:
+                    Dispose();
+                    await new PromiseTask();
+                    break;
+            }
+        }
+        #endregion
+
+
         #region private methods
         // Helper Function to invoke or register resolve/reject handlers
         protected void ActionHandlers(IRejectable resultPromise, Action resolveHandler, Action<Exception> rejectHandler)
@@ -656,13 +732,13 @@ namespace RSG.Promises
         {
             if (_rejectHandlers == null)
             {
-                if (_rejectListPool.Count == 0)
+                if (!_rejectListPool.TryPop(out var result))
                 {
-                    _rejectHandlers = new List<RejectHandler>();
+                    _rejectHandlers = new ListPoolNode<RejectHandler>();
                 }
                 else
                 {
-                    _rejectHandlers = _rejectListPool.Dequeue();
+                    _rejectHandlers = result;
                 }
             }
             _rejectHandlers.Add(new RejectHandler
@@ -676,13 +752,13 @@ namespace RSG.Promises
         {
             if (_resolveHandlers == null)
             {
-                if (_resolveListPool.Count == 0)
+                if (!_resolveListPool.TryPop(out var result))
                 {
-                    _resolveHandlers = new List<ResolveHandler>();
+                    _resolveHandlers = new ListPoolNode<ResolveHandler>();
                 }
                 else
                 {
-                    _resolveHandlers = _resolveListPool.Dequeue();
+                    _resolveHandlers = result;
                 }
             }
             _resolveHandlers.Add(new ResolveHandler
@@ -696,13 +772,13 @@ namespace RSG.Promises
         {
             if (_progressHandlers == null)
             {
-                if (_progressListPool.Count == 0)
+                if (!_progressListPool.TryPop(out var result))
                 {
-                    _progressHandlers = new List<ProgressHandler>();
+                    _progressHandlers = new ListPoolNode<ProgressHandler>();
                 }
                 else
                 {
-                    _progressHandlers = _progressListPool.Dequeue();
+                    _progressHandlers = result;
                 }
             }
             _progressHandlers.Add(new ProgressHandler
@@ -761,17 +837,17 @@ namespace RSG.Promises
             _resolveHandlers?.Clear();
             _progressHandlers?.Clear();
 
-            if(_resolveHandlers!=null)
+            if (_resolveHandlers != null)
             {
-                _resolveListPool.Enqueue(_resolveHandlers);
+                _resolveListPool.TryPush(_resolveHandlers);
             }
             if (_rejectHandlers != null)
             {
-                _rejectListPool.Enqueue(_rejectHandlers);
+                _rejectListPool.TryPush(_rejectHandlers);
             }
             if (_progressHandlers != null)
             {
-                _progressListPool.Enqueue(_progressHandlers);
+                _progressListPool.TryPush(_progressHandlers);
             }
 
             _rejectHandlers = null;
@@ -928,6 +1004,29 @@ namespace RSG.Promises
         {
             return ResolvedPromise.SequenceInternal(fns);
         }
+
+#if DEBUG
+        // for unit-test
+        public static int GetPendingPromiseCount()
+        {
+            return PendingPromises.Count;
+        }
+
+        public static void ClearPending()
+        {
+            PendingPromises.Clear();
+        }
+
+        public static int Test_GetResolveListPoolCount()
+        {
+            return _resolveListPool.Size;
+        }
+        public static int Test_GetPoolCount()
+        {
+            return _taskPool.Size;
+        }
+#endif
+
         #endregion
 
         #region private extension method

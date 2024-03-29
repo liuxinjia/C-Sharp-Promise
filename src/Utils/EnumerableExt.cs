@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace RSG.Promises
+namespace RSG.Promise.Utils
 {
     /// <summary>
     /// General extensions to LINQ.

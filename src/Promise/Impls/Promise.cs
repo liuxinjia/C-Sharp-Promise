@@ -1,4 +1,5 @@
 using RSG.Promise;
+using RSG.Promise.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,7 +21,7 @@ namespace RSG.Promises
         /// <summary>
         ///     Error handlers.
         /// </summary>
-        protected List<RejectHandler> _rejectHandlers;
+        protected ListPoolNode<RejectHandler> _rejectHandlers;
         /// <summary>
         ///     Completed handlers that accept no value.
         /// </summary>
@@ -28,13 +29,15 @@ namespace RSG.Promises
         /// <summary>
         ///     Progress handlers.
         /// </summary>
-        protected List<ProgressHandler> _progressHandlers;
+        protected ListPoolNode<ProgressHandler> _progressHandlers;
         /// <summary>
         ///     The value when the promises is resolved.
         /// </summary>
         protected PromisedT _resolveValue;
         private Action _rejesterAction;
         private Exception _rejectionException;
+        private Promise<PromisedT> _nextNode;
+
         private static readonly Promise<PromisedT> _resolvePromise = new Promise<PromisedT>();
         #endregion
 
@@ -43,8 +46,8 @@ namespace RSG.Promises
         public PromiseState CurState { get; protected set; }
         public int Id { get; private set; }
 
-        private Promise<PromisedT> _nextNode;
         public ref Promise<PromisedT> NextNode => ref _nextNode;
+        public bool IsRecycled { get; set; }
         #endregion
 
         public Promise()
@@ -84,6 +87,7 @@ namespace RSG.Promises
             }
             return promise;
         }
+
         public static Promise<PromisedT> Create(Action<Action<PromisedT>, Action<Exception>> resolver)
         {
             var promise = Create();
@@ -111,7 +115,6 @@ namespace RSG.Promises
             Name = string.Empty;
             _resolveValue = default;
             CurState = PromiseState.Pending;
-
             _rejesterAction = null;
 
             _taskPool.TryPush(this);
@@ -757,7 +760,6 @@ namespace RSG.Promises
                     var tmpValue = _resolveValue;
                     Dispose();
                     return await new PromiseTask<PromisedT>(tmpValue, 50);
-                    return await PromiseTask<PromisedT>.FromResult(tmpValue);
             }
         }
         #endregion
@@ -796,13 +798,13 @@ namespace RSG.Promises
         {
             if (_rejectHandlers == null)
             {
-                if (Promise._rejectListPool.Count == 0)
+                if (!Promise._rejectListPool.TryPop(out var result))
                 {
-                    _rejectHandlers = new List<RejectHandler>();
+                    _rejectHandlers = new ListPoolNode<RejectHandler>();
                 }
                 else
                 {
-                    _rejectHandlers = Promise._rejectListPool.Dequeue();
+                    _rejectHandlers = result;
                 }
             }
             _rejectHandlers.Add(new RejectHandler
@@ -836,13 +838,13 @@ namespace RSG.Promises
         {
             if (_progressHandlers == null)
             {
-                if (Promise._progressListPool.Count == 0)
+                if (!Promise._progressListPool.TryPop(out var result))
                 {
-                    _progressHandlers = new List<ProgressHandler>();
-                }
+                    _progressHandlers = new ListPoolNode<ProgressHandler>();
+                }   
                 else
                 {
-                    _progressHandlers = Promise._progressListPool.Dequeue();
+                    _progressHandlers = result;
                 }
             }
             _progressHandlers.Add(new ProgressHandler
@@ -908,11 +910,11 @@ namespace RSG.Promises
             }
             if (_rejectHandlers != null)
             {
-                Promise._rejectListPool.Enqueue(_rejectHandlers);
+                Promise._rejectListPool.TryPush(_rejectHandlers);
             }
             if (_progressHandlers != null)
             {
-                Promise._progressListPool.Enqueue(_progressHandlers);
+                Promise._progressListPool.TryPush(_progressHandlers);
             }
 
             _rejectHandlers = null;

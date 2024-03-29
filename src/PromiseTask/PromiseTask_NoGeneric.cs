@@ -3,13 +3,12 @@ using RSG.CompilerServices;
 
 namespace RSG
 {
-
-
-    [AsyncMethodBuilder(typeof(PromiseTaskMethodBuilder<>))]
-    public partial struct PromiseTask<T>
+    [AsyncMethodBuilder(typeof(PromiseTaskMethodBuilder))]
+    public partial struct PromiseTask
     {
-        internal readonly IPromiseTaskSource<T> source;
-        internal readonly T result;
+        public static readonly PromiseTask CompletedTask = new PromiseTask();
+
+        internal readonly IPromiseTaskSource source;
         internal readonly short token;
 
         public PromiseTaskStatus Status
@@ -20,21 +19,19 @@ namespace RSG
             }
         }
 
-        public PromiseTask(T result, short token = 10)
+        public PromiseTask(short token = 10)
         {
             this.source = null;
             this.token = token;
-            this.result = result;
         }
 
-        public PromiseTask(IPromiseTaskSource<T> source, short token)
+        public PromiseTask(IPromiseTaskSource source, short token)
         {
             this.source = source;
             this.token = token;
-            this.result = default;
         }
 
-        public PromiseTaskAwaiter<T> GetAwaiter() => new PromiseTaskAwaiter<T>(this);
+        public PromiseTaskAwaiter GetAwaiter() => new PromiseTaskAwaiter(this);
 
     }
 

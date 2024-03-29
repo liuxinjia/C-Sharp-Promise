@@ -1,7 +1,6 @@
-using RSG.Promises;
+using RSG.Promise.Utils;
 using System;
 using System.Linq;
-
 using Xunit;
 
 namespace RSG.Promises.Tests
