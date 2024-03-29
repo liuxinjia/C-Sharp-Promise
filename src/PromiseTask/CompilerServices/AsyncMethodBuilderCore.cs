@@ -1,8 +1,8 @@
-using RSG.Utils;
+using Cr7Sund.Utils;
 using System.Runtime.CompilerServices;
 using System;
 
-namespace RSG.CompilerServices
+namespace Cr7Sund.CompilerServices
 {
     internal sealed class AsyncMethodBuilderCore<TStateMachine> : IStateMachineRunnerPromise, IPromiseTaskSource, ITaskPoolNode<AsyncMethodBuilderCore<TStateMachine>>
     where TStateMachine : IAsyncStateMachine

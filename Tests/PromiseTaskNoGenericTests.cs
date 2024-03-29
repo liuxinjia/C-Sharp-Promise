@@ -2,7 +2,7 @@ using System;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace RSG.Promises.Tests
+namespace Cr7Sund.Promises.Tests
 {
     public class PromiseTaskNoGenericTests
     {

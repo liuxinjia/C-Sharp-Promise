@@ -1,8 +1,8 @@
-using RSG;
+using Cr7Sund;
 using System;
 using System.Collections.Generic;
 
-namespace RSG.Promises
+namespace Cr7Sund.Promises
 {
     /// <summary>
     /// Represents a C# promise.

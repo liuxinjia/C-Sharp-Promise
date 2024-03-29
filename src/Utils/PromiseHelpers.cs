@@ -1,6 +1,6 @@
-using RSG.Promises;
+using Cr7Sund.Promises;
 
-namespace RSG.Promise.Utils
+namespace Cr7Sund.Promise.Utils
 {
     public static class PromiseHelpers
     {

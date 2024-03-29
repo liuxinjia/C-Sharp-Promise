@@ -1,7 +1,7 @@
 using System;
 using Xunit;
 
-namespace RSG.Promises.Tests.A__Spec
+namespace Cr7Sund.Promises.Tests.A__Spec
 {
     public class _2_2
     {

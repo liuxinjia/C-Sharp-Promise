@@ -1,8 +1,8 @@
-using RSG.CompilerServices;
+using Cr7Sund.CompilerServices;
 using System;
 using System.Threading;
 
-namespace RSG
+namespace Cr7Sund
 {
     public sealed class WhenAllPromiseTaskSource : IPromiseTaskSource
     {

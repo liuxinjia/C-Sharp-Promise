@@ -1,10 +1,10 @@
-using RSG.Promise.Utils;
-using RSG.Promises;
+using Cr7Sund.Promise.Utils;
+using Cr7Sund.Promises;
 using System;
 using System.Linq;
 using Xunit;
 
-namespace RSG.Promises.Tests
+namespace Cr7Sund.Promises.Tests
 {
     public class PromiseTests
     {

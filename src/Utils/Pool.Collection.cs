@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace RSG.Promise.Utils
+namespace Cr7Sund.Promise.Utils
 {
     public class QueuePoolNode<T> : Queue<T>, IPoolNode<QueuePoolNode<T>>
     {

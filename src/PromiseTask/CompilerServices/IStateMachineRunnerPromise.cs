@@ -1,7 +1,7 @@
 using System;
-using RSG;
+using Cr7Sund;
 
-namespace RSG.CompilerServices
+namespace Cr7Sund.CompilerServices
 {
     internal interface IStateMachineRunnerPromise
     {

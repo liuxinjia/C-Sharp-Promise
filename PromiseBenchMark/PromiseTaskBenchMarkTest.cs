@@ -1,5 +1,5 @@
 using BenchmarkDotNet.Attributes;
-using RSG.Promises;
+using Cr7Sund.Promises;
 
 namespace PromiseBenchMark
 {

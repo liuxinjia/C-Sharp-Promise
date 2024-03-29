@@ -12,7 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\src\RSG.Promise.csproj" />
+    <ProjectReference Include="..\src\Cr7Sund.Promise.csproj" />
   </ItemGroup>
 
 </Project>

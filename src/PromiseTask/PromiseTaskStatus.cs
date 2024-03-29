@@ -1,6 +1,6 @@
 ﻿using System.Runtime.CompilerServices;
 
-namespace RSG
+namespace Cr7Sund
 {
     public enum PromiseTaskStatus
     {

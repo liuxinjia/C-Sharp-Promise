@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace RSG.Promises.Exceptions
+namespace Cr7Sund.Promises.Exceptions
 {
     /// <summary>
     /// Base class for promise exceptions.

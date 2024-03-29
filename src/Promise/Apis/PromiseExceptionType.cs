@@ -1,4 +1,4 @@
-namespace RSG.Promises
+namespace Cr7Sund.Promises
 {
     public enum PromiseExceptionType
     {

@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-namespace RSG.Promises
+namespace Cr7Sund.Promises
 {
     /// <summary>
     /// Implements a non-generic C# promise, a promise that simply resolves without delivering a value.

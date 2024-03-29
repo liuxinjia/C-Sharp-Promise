@@ -1,5 +1,5 @@
-using RSG;
-using RSG.Promises;
+using Cr7Sund;
+using Cr7Sund.Promises;
 using System;
 using System.Diagnostics;
 using System.Linq.Expressions;

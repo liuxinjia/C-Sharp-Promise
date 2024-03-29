@@ -1,7 +1,7 @@
 using System.Runtime.CompilerServices;
-using RSG.CompilerServices;
+using Cr7Sund.CompilerServices;
 
-namespace RSG
+namespace Cr7Sund
 {
     [AsyncMethodBuilder(typeof(PromiseTaskMethodBuilder))]
     public partial struct PromiseTask

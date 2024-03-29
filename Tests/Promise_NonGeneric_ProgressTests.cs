@@ -1,7 +1,7 @@
 using System;
 using Xunit;
 
-namespace RSG.Promises.Tests
+namespace Cr7Sund.Promises.Tests
 {
     public class Promise_NonGeneric_ProgressTests
     {

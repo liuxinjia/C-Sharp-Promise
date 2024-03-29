@@ -1,7 +1,7 @@
-﻿using RSG.Utils;
+﻿using Cr7Sund.Utils;
 using System;
 
-namespace RSG
+namespace Cr7Sund
 {
     public sealed class PromiseTaskSource<T> : IPromiseTaskSource<T>, ITaskPoolNode<PromiseTaskSource<T>>
     {

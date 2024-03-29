@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace RSG
+namespace Cr7Sund
 {
     public partial struct PromiseTask<T>
     {

@@ -52,9 +52,9 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\src\RSG.Promise.csproj">
+    <ProjectReference Include="..\..\src\Cr7Sund.Promise.csproj">
       <Project>{7e1c6a8a-84e7-43c3-ae73-c6e8a9f11af3}</Project>
-      <Name>RSG.Promise</Name>
+      <Name>Cr7Sund.Promise</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -1,6 +1,6 @@
 using System;
 using System.Runtime.CompilerServices;
-namespace RSG.Promises
+namespace Cr7Sund.Promises
 {
     public interface IBasePromise : IDisposable
     {
@@ -21,15 +21,15 @@ namespace RSG.Promises
 
     public static class PromiseStateExtension
     {
-        public static RSG.PromiseTaskStatus ToTaskStatus(this PromiseState promiseState)
+        public static Cr7Sund.PromiseTaskStatus ToTaskStatus(this PromiseState promiseState)
         {
             switch (promiseState)
             {
-                case PromiseState.Pending: return RSG.PromiseTaskStatus.Pending;
-                case PromiseState.Resolved: return RSG.PromiseTaskStatus.Succeeded;
+                case PromiseState.Pending: return Cr7Sund.PromiseTaskStatus.Pending;
+                case PromiseState.Resolved: return Cr7Sund.PromiseTaskStatus.Succeeded;
                 case PromiseState.Rejected:
                 default:
-                    return RSG.PromiseTaskStatus.Faulted;
+                    return Cr7Sund.PromiseTaskStatus.Faulted;
             }
         }
     }

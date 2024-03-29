@@ -2,7 +2,7 @@ using System;
 using System.Diagnostics;
 using System.Runtime.ExceptionServices;
 
-namespace RSG
+namespace Cr7Sund
 {
     public sealed class ExceptionResultSource : IPromiseTaskSource
     {

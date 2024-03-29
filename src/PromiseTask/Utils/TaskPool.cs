@@ -2,7 +2,7 @@ using System;
 using System.Runtime.CompilerServices;
 using System.Threading;
 
-namespace RSG.Utils
+namespace Cr7Sund.Utils
 {
     public interface ITaskPoolNode<T>
     {

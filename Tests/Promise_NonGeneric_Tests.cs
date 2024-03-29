@@ -1,9 +1,9 @@
-using RSG.Promise.Utils;
+using Cr7Sund.Promise.Utils;
 using System;
 using System.Linq;
 using Xunit;
 
-namespace RSG.Promises.Tests
+namespace Cr7Sund.Promises.Tests
 {
     public class Promise_NonGeneric_Tests
     {

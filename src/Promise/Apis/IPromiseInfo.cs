@@ -1,4 +1,4 @@
-namespace RSG.Promises
+namespace Cr7Sund.Promises
 {
     /// <summary>
     ///     Used to list information of pending promises.

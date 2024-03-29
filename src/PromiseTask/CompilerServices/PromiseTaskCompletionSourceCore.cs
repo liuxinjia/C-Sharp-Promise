@@ -4,7 +4,7 @@ using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices;
 using System.Threading;
 
-namespace RSG.CompilerServices
+namespace Cr7Sund.CompilerServices
 {
 #if DEBUG
     internal class ExceptionHolder

@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace RSG.Promises
+namespace Cr7Sund.Promises
 {
 
     public class PromiseCancelledException : Exception

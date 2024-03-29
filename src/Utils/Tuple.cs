@@ -1,4 +1,4 @@
-namespace RSG.Promise.Utils
+namespace Cr7Sund.Promise.Utils
 {
     /// <summary>
     /// Provides static methods for creating tuple objects.

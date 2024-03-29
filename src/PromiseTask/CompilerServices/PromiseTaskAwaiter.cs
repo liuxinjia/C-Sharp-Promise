@@ -1,7 +1,7 @@
 using System;
 using System.Runtime.CompilerServices;
 
-namespace RSG.CompilerServices
+namespace Cr7Sund.CompilerServices
 {
     public struct PromiseTaskAwaiter<T> : ICriticalNotifyCompletion
     {

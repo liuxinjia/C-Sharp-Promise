@@ -1,11 +1,11 @@
-using RSG.Promise;
-using RSG.Promise.Utils;
+using Cr7Sund.Promise;
+using Cr7Sund.Promise.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.ExceptionServices;
 
-namespace RSG.Promises
+namespace Cr7Sund.Promises
 {
 
     public class Promise<PromisedT> : IPromise<PromisedT>, IPromiseTaskSource<PromisedT>, IPoolNode<Promise<PromisedT>>

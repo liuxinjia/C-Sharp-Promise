@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Threading;
 
-namespace RSG.Promise.Utils
+namespace Cr7Sund.Promise.Utils
 {
     public interface IPoolNode<T>
     {

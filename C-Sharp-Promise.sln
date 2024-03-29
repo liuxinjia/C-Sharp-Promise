@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.9.34616.47
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RSG.Promise", "src\RSG.Promise.csproj", "{7E1C6A8A-84E7-43C3-AE73-C6E8A9F11AF3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cr7Sund.Promise", "src\Cr7Sund.Promise.csproj", "{7E1C6A8A-84E7-43C3-AE73-C6E8A9F11AF3}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Promise.Tests", "Tests\Promise.Tests.csproj", "{4B4EE1A6-25A3-43D0-BAE9-5E45E31F2816}"
 EndProject

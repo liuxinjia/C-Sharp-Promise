@@ -1,9 +1,9 @@
 using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using RSG;
+using Cr7Sund;
 
-namespace RSG.CompilerServices
+namespace Cr7Sund.CompilerServices
 {
     public struct PromiseTaskMethodBuilder<T>
     {

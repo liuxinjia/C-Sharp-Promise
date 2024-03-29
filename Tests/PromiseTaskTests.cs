@@ -1,4 +1,4 @@
-using RSG.Promises;
+using Cr7Sund.Promises;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -11,7 +11,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace RSG.Promises.Tests
+namespace Cr7Sund.Promises.Tests
 {
     public class PromiseTaskTests
     {

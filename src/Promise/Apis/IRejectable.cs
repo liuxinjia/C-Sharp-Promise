@@ -1,5 +1,5 @@
 using System;
-namespace RSG.Promises
+namespace Cr7Sund.Promises
 {
     /// <summary>
     ///     Interface for a promise that can be rejected.
