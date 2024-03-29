@@ -12,6 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\..\..\Downloads\C-Sharp-Promise-master\C-Sharp-Promise-master\src\RSG.Promise.csproj" />
     <ProjectReference Include="..\src\Cr7Sund.Promise.csproj" />
   </ItemGroup>
 

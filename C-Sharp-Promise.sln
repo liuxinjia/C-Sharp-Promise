@@ -21,6 +21,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Example5", "Examples\Exampl
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PromiseBenchMark", "PromiseBenchMark\PromiseBenchMark.csproj", "{37D6E2DE-E8AE-4A01-8785-B96CDF95A224}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RSG.Promise", "..\..\..\..\Downloads\C-Sharp-Promise-master\C-Sharp-Promise-master\src\RSG.Promise.csproj", "{8473B329-0E5D-4A1B-AE32-A7439B7BEF30}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -59,6 +61,10 @@ Global
 		{37D6E2DE-E8AE-4A01-8785-B96CDF95A224}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{37D6E2DE-E8AE-4A01-8785-B96CDF95A224}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{37D6E2DE-E8AE-4A01-8785-B96CDF95A224}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8473B329-0E5D-4A1B-AE32-A7439B7BEF30}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8473B329-0E5D-4A1B-AE32-A7439B7BEF30}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8473B329-0E5D-4A1B-AE32-A7439B7BEF30}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8473B329-0E5D-4A1B-AE32-A7439B7BEF30}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
