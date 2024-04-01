@@ -1,9 +1,7 @@
-using Cr7Sund.Promise;
 using Cr7Sund.Promise.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.ExceptionServices;
 
 namespace Cr7Sund.Promises
 {
@@ -11,8 +9,8 @@ namespace Cr7Sund.Promises
     public class Promise<PromisedT> : IPromise<PromisedT>, IPromiseTaskSource<PromisedT>, IPoolNode<Promise<PromisedT>>
     {
         #region Static Fields
-        private static Pool<Promise<PromisedT>> _taskPool;
-        private static Pool<ListPoolNode<ResolveHandler<PromisedT>>> _resolveListPool;
+        private static ReusablePool<Promise<PromisedT>> _taskPool;
+        private static ReusablePool<ListPoolNode<ResolveHandler<PromisedT>>> _resolveListPool;
 
         #endregion
 
@@ -638,7 +636,10 @@ namespace Cr7Sund.Promises
             {
                 throw new Exception(PromiseExceptionType.Valid_RESOLVED_STATE.ToString());
             }
-
+            if (IsRecycled)
+            {
+                throw new Exception("can resolve twice, since it has been recycled");
+            }
             _resolveValue = value;
             CurState = PromiseState.Resolved;
 
@@ -648,6 +649,7 @@ namespace Cr7Sund.Promises
             }
 
             InvokeResolveHandlers(value);
+            _rejesterAction?.Invoke();
         }
 
         public void ReportProgress(float progress)
@@ -672,7 +674,10 @@ namespace Cr7Sund.Promises
             {
                 throw new Exception(PromiseExceptionType.Valid_REJECTED_STATE.ToString());
             }
-
+            if (IsRecycled)
+            {
+                throw new Exception("can rejected twice, since it has been recycled");
+            }
             _rejectionException = ex;
             CurState = PromiseState.Rejected;
 
@@ -682,6 +687,7 @@ namespace Cr7Sund.Promises
             }
 
             InvokeRejectHandlers(ex);
+            _rejesterAction?.Invoke();
         }
 
         public void Cancel()
@@ -746,6 +752,10 @@ namespace Cr7Sund.Promises
 
         public async PromiseTask<PromisedT> AsTask()
         {
+            if (this.IsRecycled)
+            {
+                throw new System.Exception("cant await twice since it has been recycled");
+            }
             switch (CurState)
             {
                 case PromiseState.Pending:
@@ -754,8 +764,8 @@ namespace Cr7Sund.Promises
                 default:
                     var tmpEx = _rejectionException;
                     Dispose();
-                    //throw new Exception(string.Empty, tmpEx);
-                    throw tmpEx;
+                    throw new Exception(string.Empty, tmpEx);
+                    //throw tmpEx;
                 case PromiseState.Resolved:
                     var tmpValue = _resolveValue;
                     Dispose();
@@ -867,7 +877,6 @@ namespace Cr7Sund.Promises
             }
 
             ClearHandlers();
-            _rejesterAction?.Invoke();
         }
 
         //Invoke all progress handlers.
@@ -895,7 +904,6 @@ namespace Cr7Sund.Promises
                 }
             }
             ClearHandlers();
-            _rejesterAction?.Invoke();
         }
 
         protected virtual void ClearHandlers()

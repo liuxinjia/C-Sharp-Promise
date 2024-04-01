@@ -8,6 +8,16 @@ namespace PromiseBenchMark
     [MemoryDiagnoser]
     public class RSGPromiseBenchMarkTest
     {
+        void DoSomething()
+        {
+
+        }
+        private Action doSomething;
+        [GlobalSetup]
+        public void Setup()
+        {
+            doSomething = DoSomething;
+        }
 
         [Benchmark]
         public void CreatePromise()
@@ -40,8 +50,22 @@ namespace PromiseBenchMark
         public void ResolveActionPromise()
         {
             var promise = new Promise();
-            promise.Then(() => { });
+            promise.Then(doSomething);
             promise.Resolve();
+        }
+
+        [Benchmark]
+        public async Task ResolvePromiseWithTask()
+        {
+            var promise = new Promise();
+            promise.Then(doSomething);
+
+            async Task ResolveInternal(Promise p1)
+            {
+                await Task.Delay(1);
+                p1.Resolve();
+            }
+            await ResolveInternal(promise);
         }
 
 
@@ -81,11 +105,9 @@ namespace PromiseBenchMark
             var promise = new Promise();
             var chainedPromise = new Promise();
 
-            var completed = 0;
-
             promise
                 .Then(() => chainedPromise)
-                .Then(() => ++completed);
+                .Then(() => { });
 
             promise.Resolve();
             chainedPromise.Resolve();

@@ -8,6 +8,16 @@ namespace PromiseBenchMark
     [Config(typeof(BenchMarkConfig))]
     public class PromiseBenchMarkTest
     {
+        void DoSomething()
+        {
+
+        }
+        private Action doSomething = null;
+        [GlobalSetup]
+        public void Setup()
+        {
+            doSomething = DoSomething;
+        }
 
         [Benchmark]
         public void CreatePromise()
@@ -40,10 +50,23 @@ namespace PromiseBenchMark
         public void ResolveActionPromise()
         {
             var promise = new Promise();
-            promise.Then(() => { });
+            promise.Then(doSomething);
             promise.Resolve();
         }
 
+        [Benchmark]
+        public async Task ResolvePromiseWithTask()
+        {
+            var promise = new Promise();
+            promise.Then(doSomething);
+
+            async Task ResolveInternal(Promise p1)
+            {
+                await Task.Delay(1);
+                p1.Resolve();
+            }
+            await ResolveInternal(promise);
+        }
 
         [Benchmark]
         public void Convert_to_non_value_promise()
@@ -81,16 +104,14 @@ namespace PromiseBenchMark
             var promise = new Promise();
             var chainedPromise = new Promise();
 
-            var completed = 0;
 
             promise
                 .Then(() => chainedPromise)
-                .Then(() => ++completed);
+                .Then(() => { });
 
             promise.Resolve();
             chainedPromise.Resolve();
         }
-
 
     }
 }

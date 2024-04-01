@@ -9,10 +9,10 @@ namespace Cr7Sund.Promises
     public class Promise : IPromise, IPromiseTaskSource, IPoolNode<Promise>
     {
         #region Static Fields
-        private static Pool<ListPoolNode<ResolveHandler>> _resolveListPool;
-        internal static Pool<ListPoolNode<RejectHandler>> _rejectListPool;
-        internal static Pool<ListPoolNode<ProgressHandler>> _progressListPool;
-        private static Pool<Promise> _taskPool;/// <summary>
+        private static ReusablePool<ListPoolNode<ResolveHandler>> _resolveListPool;
+        internal static ReusablePool<ListPoolNode<RejectHandler>> _rejectListPool;
+        internal static ReusablePool<ListPoolNode<ProgressHandler>> _progressListPool;
+        private static ReusablePool<Promise> _taskPool;/// <summary>
                                                ///     Set to true to enable tracking of promises.
                                                /// </summary>
         public static bool EnablePromiseTracking = false;
@@ -576,6 +576,10 @@ namespace Cr7Sund.Promises
             {
                 throw new Exception(PromiseExceptionType.Valid_RESOLVED_STATE.ToString());
             }
+            if (IsRecycled)
+            {
+                throw new Exception("can resolve twice, since it has been recycled");
+            }
 
             CurState = PromiseState.Resolved;
             if (EnablePromiseTracking)
@@ -584,6 +588,7 @@ namespace Cr7Sund.Promises
             }
 
             InvokeResolveHandlers();
+            _rejesterAction?.Invoke();
         }
 
         public void ReportProgress(float progress)
@@ -609,7 +614,10 @@ namespace Cr7Sund.Promises
             {
                 throw new Exception(PromiseExceptionType.Valid_REJECTED_STATE.ToString());
             }
-
+            if (IsRecycled)
+            {
+                throw new Exception("can rejected twice, since it has been recycled");
+            }
             _rejectionException = ex;
             CurState = PromiseState.Rejected;
 
@@ -620,6 +628,7 @@ namespace Cr7Sund.Promises
 
             // only output error when you don't achieve onRejected
             InvokeRejectHandlers(ex);
+            _rejesterAction?.Invoke();
         }
 
         public void Cancel()
@@ -680,6 +689,10 @@ namespace Cr7Sund.Promises
 
         public async PromiseTask AsTask()
         {
+            if (this.IsRecycled)
+            {
+                throw new System.Exception("cant await twice since it has been recycled");
+            }
             switch (CurState)
             {
                 case PromiseState.Pending:
@@ -708,9 +721,11 @@ namespace Cr7Sund.Promises
             {
                 case PromiseState.Resolved:
                     InvokeResolveHandler(resolveHandler, resultPromise);
+                    _rejesterAction?.Invoke();
                     break;
                 case PromiseState.Rejected:
                     InvokeRejectHandler(rejectHandler, resultPromise, _rejectionException);
+                    _rejesterAction?.Invoke();
                     break;
                 default:
                     AddResolveHandler(resolveHandler, resultPromise);
@@ -857,8 +872,6 @@ namespace Cr7Sund.Promises
 
         private void InvokeResolveHandler(Action callback, IRejectable rejectable)
         {
-
-
 
             try
             {

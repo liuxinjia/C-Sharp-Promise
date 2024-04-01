@@ -1,4 +1,5 @@
 using BenchmarkDotNet.Attributes;
+using Cr7Sund;
 using Cr7Sund.Promises;
 
 namespace PromiseBenchMark
@@ -7,29 +8,84 @@ namespace PromiseBenchMark
     [Config(typeof(BenchMarkConfig))]
     public class PromiseTaskBenchMarkTest
     {
-        [Benchmark]
-        public async Task ResolveAsyncPromise()
+        void DoSomething()
         {
-            var promise = Promise.Create();
-            await promise.ResolveAsync();
+
+        }
+        private Action doSomething = null;
+        [GlobalSetup]
+        public void Setup()
+        {
+            doSomething = DoSomething;
         }
 
-        [Benchmark]
+        //[Benchmark]
+        public async Task ResolveAction()
+        {
+            async PromiseTask ResolveInternal()
+            {
+                var promise = Promise.Create();
+                await promise.ResolveAsync();
+                doSomething?.Invoke();
+            }
+            await ResolveInternal();
+        }
+
+
+        //[Benchmark]
         public async Task ResolvePromiseWithTask()
         {
             var promise = new Promise();
-            await Task.Delay(1);
-            await promise.ResolveAsync();
+            promise.Then(doSomething);
+
+            async PromiseTask ResolveInternal(Promise p1)
+            {
+                await Task.Delay(1).ConfigureAwait(true);
+                p1.Resolve();
+            }
+
+            var task = ResolveInternal(promise);
+            await promise.AsTask();
+            await task;
+        }
+
+        //[Benchmark]
+        public async Task ComparisonTask()
+        {
+            async Task ResolveInternal()
+            {
+                await Task.Delay(1).ConfigureAwait(true);
+            }
+            await ResolveInternal();
         }
 
         [Benchmark]
-        public async Task ChainPromisesAsync()
+        public async Task ComparisonTaskAA()
         {
-            var promise = Promise.Create();
-            var chainedPromise = Promise.Create();
+            async Task ResolveInternal()
+            {
+                await Task.Delay(1).ConfigureAwait(false);
+            }
+            await ResolveInternal();
+        }
+        //[Benchmark]
+        public async Task ChainPromises()
+        {
+            async PromiseTask ResolveInternal()
+            {
+                var promise = Promise.Create();
+                await promise.ResolveAsync();
+            }
 
-            await promise.ResolveAsync();
-            await chainedPromise.ResolveAsync();
+            async PromiseTask ResolveChildInternal()
+            {
+                var promise = Promise.Create();
+                //completed++;
+                await promise.ResolveAsync();
+            }
+
+            await ResolveInternal();
+            await ResolveChildInternal();
         }
 
     }

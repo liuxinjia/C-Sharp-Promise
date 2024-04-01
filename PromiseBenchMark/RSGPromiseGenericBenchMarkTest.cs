@@ -1,11 +1,11 @@
 using BenchmarkDotNet.Attributes;
-using Cr7Sund.Promises;
+using RSG;
 
 
 namespace PromiseBenchMark
 {
     [MemoryDiagnoser]
-    public class PromiseGenericBenchMarkTest
+    public class RSGPromiseGenericBenchMarkTest
     {
 
         [Benchmark]
@@ -40,7 +40,7 @@ namespace PromiseBenchMark
         public void ResolveActionPromise()
         {
             var promise = new Promise<int>();
-            promise.Then(_ => { });
+            promise.Then((v) => { });
             promise.Resolve(2);
         }
 

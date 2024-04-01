@@ -1,35 +1,54 @@
 using BenchmarkDotNet.Attributes;
+using Cr7Sund;
 using Cr7Sund.Promises;
 
 namespace PromiseBenchMark
 {
     [MemoryDiagnoser]
-    public class PromiseTasGenericBenchMarkTest
+    public class PromiseTaskGenericBenchMarkTest
     {
         [Benchmark]
-        public async Task ResolveAsyncPromise()
+        public async Task ResolveAction()
         {
-            var promise = Promise<int>.Create();
-            await promise.ResolveAsync(2);
+            async PromiseTask ResolveInternal(int value)
+            {
+                var promise = Promise<int>.Create();
+                // value++; or value.AsValueTask();
+                await promise.ResolveAsync(value);
+            }
+
+            await ResolveInternal(2);
         }
 
         [Benchmark]
         public async Task ResolvePromiseWithTask()
         {
-            var promise = new Promise<int>();
+            var promise = Promise<int>.Create();
             await Task.Delay(1);
             await promise.ResolveAsync(2);
         }
 
         [Benchmark]
-        public async Task ChainPromisesAsync()
+        public async Task ChainPromises()
         {
-            var promise = Promise<int>.Create();
-            var chainedPromise = Promise<int>.Create();
             var result = 0;
 
-            result = await promise.ResolveAsync(result);
-            result = await chainedPromise.ResolveAsync(result);
+            async PromiseTask<int> ResolveInternal(int result)
+            {
+                var promise = Promise<int>.Create();
+                result++;
+                return await promise.ResolveAsync(result);
+            }
+
+            async PromiseTask<int> ResolveChildInternal(int result)
+            {
+                var promise = Promise<int>.Create();
+                result++;
+                return await promise.ResolveAsync(result);
+            }
+
+            result = await ResolveInternal(result);
+            result = await ResolveChildInternal(result);
         }
 
     }

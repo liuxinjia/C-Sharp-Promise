@@ -1,7 +1,5 @@
 using System;
-using System.Collections.Generic;
 using System.Runtime.CompilerServices;
-using System.Threading;
 
 namespace Cr7Sund.Promise.Utils
 {
@@ -11,7 +9,7 @@ namespace Cr7Sund.Promise.Utils
         bool IsRecycled { get; set; }
     }
 
-    public struct Pool<T> where T : class, IPoolNode<T>
+    public struct ReusablePool<T> where T : class, IPoolNode<T>
     {
         internal static int MaxPoolSize = int.MaxValue;
 

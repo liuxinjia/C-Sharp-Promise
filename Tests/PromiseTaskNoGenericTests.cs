@@ -108,10 +108,34 @@ namespace Cr7Sund.Promises.Tests
                 resultEx = ex.Message;
             }
 
-            Assert.Equal("item is alread recycled", resultEx);
+            Assert.Equal("can resolve twice, since it has been recycled", resultEx);
         }
 
-       
+        [Fact]
+        public async Task AwaitTaskTwice()
+        {
+            var promise = Promise.Create();
+            string resultEx = null;
+
+            async PromiseTask ResolveInternal()
+            {
+                await promise.AsTask();
+            }
+
+            await promise.ResolveAsync();
+            try
+            {
+                await ResolveInternal();
+            }
+            catch (Exception ex)
+            {
+                resultEx = ex.Message;
+            }
+
+            Assert.Equal("cant await twice since it has been recycled", resultEx);
+        }
+
+
 #if DEBUG
         [Fact]
         public void PoolAction()

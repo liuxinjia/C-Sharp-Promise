@@ -2,8 +2,6 @@ using Cr7Sund;
 using Cr7Sund.Promises;
 using System;
 using System.Diagnostics;
-using System.Linq.Expressions;
-using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
 //
@@ -14,22 +12,41 @@ namespace Example
 
     class Program
     {
- 
+
         static async Task Main(string[] args)
         {
             var stopWatch = new Stopwatch();
             stopWatch.Start();
             //await sequentialStart();
-
             //await sequentialWait();
             //await concurrent1();
-            await concurrent2();
+            //await concurrent2();
+
+
+            await ResolvePromiseWithTask();
+
             stopWatch.Stop();
             Console.WriteLine($"Finish : {stopWatch.ElapsedMilliseconds}");
-
             Console.ReadLine();
         }
+        public static async Task ResolvePromiseWithTask()
+        {
+            var promise = Promise.Create();
 
+            async Task ResolveInternal()
+            {
+                await Task.Delay(1);
+                Console.WriteLine("1");
+                promise.Resolve();
+                Console.WriteLine("3");
+            }
+            var task = ResolveInternal();
+
+            Console.WriteLine("0");
+            await promise.AsTask();
+            Console.WriteLine("2");
+            await task;
+        }
         private static async PromiseTask<string> resolveAfter2Seconds()
         {
             Console.WriteLine("starting slow promise");
